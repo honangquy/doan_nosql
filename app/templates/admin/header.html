@@ -1,0 +1,129 @@
+<!-- Header -->
+<header class="main-header">
+    <div class="header-content">
+        <div class="header-left">
+            <button class="sidebar-toggle-btn d-lg-none" onclick="toggleSidebar()">
+                <i class="bi bi-list"></i>
+            </button>
+            
+            <div class="page-title">
+                <h4 class="page-heading">{% block page_title %}Dashboard{% endblock %}</h4>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        {% block breadcrumb %}
+                        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item active">Overview</li>
+                        {% endblock %}
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <!-- Search -->
+            <div class="header-search">
+                <div class="search-box">
+                    <i class="bi bi-search search-icon"></i>
+                    <input type="text" class="form-control" placeholder="Tìm kiếm..." id="globalSearch">
+                </div>
+            </div>
+            
+            <!-- Notifications -->
+            <div class="header-notifications">
+                <div class="dropdown">
+                    <button class="btn btn-ghost btn-icon" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end notification-dropdown">
+                        <div class="dropdown-header">
+                            <h6 class="dropdown-title">Thông Báo</h6>
+                            <span class="badge badge-primary">3 mới</span>
+                        </div>
+                        <div class="dropdown-body">
+                            <a href="#" class="notification-item">
+                                <div class="notification-icon bg-success">
+                                    <i class="bi bi-check-circle"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <h6 class="notification-title">Đặt vé mới</h6>
+                                    <p class="notification-text">Khách hàng Nguyễn Văn A đã đặt vé</p>
+                                    <small class="notification-time">5 phút trước</small>
+                                </div>
+                            </a>
+                            <a href="#" class="notification-item">
+                                <div class="notification-icon bg-warning">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <h6 class="notification-title">Xe cần bảo dưỡng</h6>
+                                    <p class="notification-text">Xe 51A-12345 cần bảo dưỡng định kỳ</p>
+                                    <small class="notification-time">1 giờ trước</small>
+                                </div>
+                            </a>
+                            <a href="#" class="notification-item">
+                                <div class="notification-icon bg-info">
+                                    <i class="bi bi-info-circle"></i>
+                                </div>
+                                <div class="notification-content">
+                                    <h6 class="notification-title">Báo cáo tuần</h6>
+                                    <p class="notification-text">Báo cáo doanh thu tuần đã sẵn sàng</p>
+                                    <small class="notification-time">2 giờ trước</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="dropdown-footer">
+                            <a href="#" class="btn btn-link">Xem tất cả</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- User Menu -->
+            <div class="header-user">
+                <div class="dropdown">
+                    <button class="btn btn-ghost user-dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <div class="user-avatar">
+                            <img src="https://ui-avatars.com/api/?name={{ session.get('username', 'Admin') }}&background=4B7BEC&color=fff&size=36" alt="Avatar">
+                        </div>
+                        <div class="user-info d-none d-md-block">
+                            <div class="user-name">{{ session.get('username', 'Admin') }}</div>
+                            <div class="user-role">Administrator</div>
+                        </div>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-end user-dropdown">
+                        <div class="dropdown-header">
+                            <div class="user-card">
+                                <img src="https://ui-avatars.com/api/?name={{ session.get('username', 'Admin') }}&background=4B7BEC&color=fff&size=48" alt="Avatar" class="user-avatar">
+                                <div class="user-details">
+                                    <h6 class="user-name">{{ session.get('username', 'Admin') }}</h6>
+                                    <p class="user-email">admin@xekhach.com</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="dropdown-body">
+                            <a class="dropdown-item" href="#">
+                                <i class="bi bi-person"></i>
+                                <span>Thông tin cá nhân</span>
+                            </a>
+                            <a class="dropdown-item" href="#">
+                                <i class="bi bi-gear"></i>
+                                <span>Cài đặt</span>
+                            </a>
+                            <a class="dropdown-item" href="#">
+                                <i class="bi bi-shield-check"></i>
+                                <span>Bảo mật</span>
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+                                <i class="bi bi-box-arrow-right"></i>
+                                <span>Đăng xuất</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

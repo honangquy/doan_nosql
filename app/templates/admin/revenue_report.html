@@ -1,0 +1,361 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Báo Cáo Doanh Thu - Admin Panel{% endblock %}
+
+{% block page_title %}Báo Cáo Doanh Thu{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+<li class="breadcrumb-item active">Doanh Thu</li>
+{% endblock %}
+
+{% block content %}
+<!-- Revenue Overview -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card modern-card">
+            <div class="stats-icon bg-success-gradient">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="stats-content">
+                <h3 class="stats-number">{{ "%.1f"|format(stats.total_revenue/1000000) }}M</h3>
+                <p class="stats-label">Tổng Doanh Thu</p>
+                <div class="stats-change positive">
+                    <i class="bi bi-arrow-up"></i>
+                    <span>+15.3%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card modern-card">
+            <div class="stats-icon bg-primary-gradient">
+                <i class="bi bi-ticket-perforated"></i>
+            </div>
+            <div class="stats-content">
+                <h3 class="stats-number">{{ stats.total_tickets }}</h3>
+                <p class="stats-label">Tổng Vé Đã Bán</p>
+                <div class="stats-change positive">
+                    <i class="bi bi-arrow-up"></i>
+                    <span>+8.2%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card modern-card">
+            <div class="stats-icon bg-warning-gradient">
+                <i class="bi bi-graph-up"></i>
+            </div>
+            <div class="stats-content">
+                <h3 class="stats-number">{{ "%.0f"|format(stats.avg_ticket_price/1000) }}K</h3>
+                <p class="stats-label">Giá Vé Trung Bình</p>
+                <div class="stats-change neutral">
+                    <i class="bi bi-dash"></i>
+                    <span>0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card modern-card">
+            <div class="stats-icon bg-info-gradient">
+                <i class="bi bi-signpost-2"></i>
+            </div>
+            <div class="stats-content">
+                <h3 class="stats-number">{{ stats.active_routes }}</h3>
+                <p class="stats-label">Tuyến Hoạt Động</p>
+                <div class="stats-change positive">
+                    <i class="bi bi-arrow-up"></i>
+                    <span>+2</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Revenue Charts -->
+<div class="row g-4 mb-4">
+    <!-- Monthly Revenue Chart -->
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title">
+                    <i class="bi bi-bar-chart-line text-primary me-2"></i>
+                    Doanh Thu Theo Tháng
+                </h5>
+                <div class="card-actions">
+                    <select class="form-select form-select-sm" style="width: auto;">
+                        <option>2025</option>
+                        <option>2024</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="monthlyRevenueChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Revenue by Route -->
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="bi bi-pie-chart text-success me-2"></i>
+                    Top Tuyến Đường
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="routeRevenueChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Revenue by Route Table -->
+<div class="row g-4">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title">
+                    <i class="bi bi-table text-info me-2"></i>
+                    Chi Tiết Doanh Thu Theo Tuyến
+                </h5>
+                <div class="card-actions">
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-download me-1"></i>
+                        Xuất Excel
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tuyến Đường</th>
+                                <th>Số Vé Bán</th>
+                                <th>Giá Vé TB</th>
+                                <th>Doanh Thu</th>
+                                <th>% Tổng DT</th>
+                                <th>Trạng Thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for route in revenue_by_route %}
+                            <tr>
+                                <td>
+                                    <div class="route-info">
+                                        <strong>{{ route.route }}</strong>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary">{{ route.tickets }}</span>
+                                </td>
+                                <td>
+                                    <span class="text-muted">{{ "{:,.0f}".format(route.avg_price) }} VND</span>
+                                </td>
+                                <td>
+                                    <strong class="text-success">{{ "{:,.0f}".format(route.revenue) }} VND</strong>
+                                </td>
+                                <td>
+                                    <div class="progress-container">
+                                        {% set percentage = (route.revenue / stats.total_revenue * 100) if stats.total_revenue > 0 else 0 %}
+                                        <div class="progress" style="width: 60px;">
+                                            <div class="progress-bar bg-success" style="width: {{ percentage }}%"></div>
+                                        </div>
+                                        <span class="ms-2 text-muted">{{ "%.1f"|format(percentage) }}%</span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">Hoạt động</span>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted">
+                                    Không có dữ liệu doanh thu
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Revenue Actions -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="bi bi-tools text-warning me-2"></i>
+                    Công Cụ Báo Cáo
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Tùy chọn thời gian:</h6>
+                        <div class="row g-2">
+                            <div class="col">
+                                <input type="date" class="form-control" placeholder="Từ ngày">
+                            </div>
+                            <div class="col">
+                                <input type="date" class="form-control" placeholder="Đến ngày">
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-primary">Lọc</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Xuất báo cáo:</h6>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-success">
+                                <i class="bi bi-file-earmark-excel"></i> Excel
+                            </button>
+                            <button class="btn btn-outline-danger">
+                                <i class="bi bi-file-earmark-pdf"></i> PDF
+                            </button>
+                            <button class="btn btn-outline-primary">
+                                <i class="bi bi-envelope"></i> Email
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+.progress-container {
+    display: flex;
+    align-items: center;
+}
+
+.route-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stats-card {
+    transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-2px);
+}
+
+.table th {
+    border-top: none;
+    font-weight: 600;
+    color: var(--gray-700);
+    background: var(--gray-50);
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.card-actions .form-select {
+    min-width: 100px;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Monthly Revenue Chart
+const monthlyCtx = document.getElementById('monthlyRevenueChart').getContext('2d');
+const monthlyRevenueChart = new Chart(monthlyCtx, {
+    type: 'bar',
+    data: {
+        labels: [{% for month in monthly_revenue %}'{{ month.month }}'{{ ',' if not loop.last }}{% endfor %}],
+        datasets: [{
+            label: 'Doanh Thu (VND)',
+            data: [{% for month in monthly_revenue %}{{ month.revenue }}{{ ',' if not loop.last }}{% endfor %}],
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 2,
+            borderRadius: 8,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0,0,0,0.1)',
+                },
+                ticks: {
+                    callback: function(value, index, values) {
+                        return (value / 1000000) + 'M VND';
+                    }
+                }
+            },
+            x: {
+                grid: {
+                    display: false,
+                }
+            }
+        }
+    }
+});
+
+// Route Revenue Pie Chart
+const routeCtx = document.getElementById('routeRevenueChart').getContext('2d');
+const routeLabels = [{% for route in revenue_by_route[:5] %}'{{ route.route.split(" - ")[0] }}'{{ ',' if not loop.last }}{% endfor %}];
+const routeData = [{% for route in revenue_by_route[:5] %}{{ route.revenue }}{{ ',' if not loop.last }}{% endfor %}];
+
+const routeRevenueChart = new Chart(routeCtx, {
+    type: 'doughnut',
+    data: {
+        labels: routeLabels,
+        datasets: [{
+            data: routeData,
+            backgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#4BC0C0',
+                '#9966FF'
+            ],
+            borderWidth: 2,
+            borderColor: '#fff'
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    usePointStyle: true
+                }
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

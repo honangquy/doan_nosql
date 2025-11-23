@@ -1,0 +1,1450 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Tạo Chuyến Xe{% endblock %}
+
+{% block styles %}
+<style>
+.create-trip-container {
+    background: #f8f9fa;
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.trip-form-card {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+    overflow: hidden;
+    max-width: 1200px;
+    margin: 0 auto;
+    border: none;
+}
+
+.trip-form-header {
+    background: #2196F3;
+    color: white;
+    padding: 3rem 2rem;
+    text-align: center;
+    position: relative;
+}
+
+.trip-form-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+    opacity: 0.1;
+}
+
+.trip-form-header h2 {
+    margin: 0;
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 1;
+}
+
+.trip-form-header .subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    margin-top: 0.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.trip-form-body {
+    padding: 3rem;
+}
+
+.form-section {
+    margin-bottom: 2.5rem;
+    padding: 2rem;
+    background: #ffffff;
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.form-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: #2196F3;
+}
+
+.form-section-title {
+    color: #2196F3;
+    font-weight: 700;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-section-title i {
+    margin-right: 0.75rem;
+    font-size: 1.5rem;
+    color: #4facfe;
+    -webkit-text-fill-color: #4facfe;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 0.875rem 1.25rem;
+    font-size: 1rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    background: #ffffff;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #4facfe;
+    box-shadow: 0 0 0 0.25rem rgba(79, 172, 254, 0.15), 0 8px 25px rgba(79, 172, 254, 0.1);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+.form-label .required {
+    color: #e74c3c;
+    margin-left: 0.25rem;
+}
+
+/* Buttons Styling */
+.btn-create-trip {
+    background: #2196F3;
+    border: none;
+    color: white;
+    padding: 1rem 3rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(33, 150, 243, 0.4);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    width: 100%;
+    margin-top: 2rem;
+}
+
+.btn-create-trip:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(33, 150, 243, 0.6);
+    background: #1976D2;
+}
+
+.btn-create-trip:active {
+    transform: translateY(-1px);
+}
+
+.btn-secondary-custom {
+    background: #6c757d;
+    border: none;
+    color: white;
+    padding: 0.75rem 2rem;
+    font-weight: 500;
+    border-radius: 25px;
+    box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-secondary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(108, 117, 125, 0.4);
+}
+
+/* Vehicle Select Styling */
+.form-select#vehicleSelect {
+    background-color: #ffffff;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m1 6 7 7 7-7'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 16px 12px;
+}
+
+.form-select#vehicleSelect option {
+    padding: 12px 16px !important;
+    margin: 2px 0 !important;
+    border-radius: 6px !important;
+    font-size: 14px;
+    line-height: 1.4;
+    transition: all 0.2s ease;
+}
+
+/* Xe phù hợp - màu xanh đậm */
+.form-select#vehicleSelect option[data-available="true"] {
+    background: linear-gradient(135deg, #d1f2eb, #a7f3d0) !important;
+    color: #065f46 !important;
+    font-weight: bold !important;
+    border: 2px solid #10b981 !important;
+}
+
+/* Xe không phù hợp - màu xám nhạt */
+.form-select#vehicleSelect option[data-available="false"] {
+    background: linear-gradient(135deg, #f9fafb, #f3f4f6) !important;
+    color: #9ca3af !important;
+    font-weight: normal !important;
+    border: 1px solid #e5e7eb !important;
+}
+
+/* Header option */
+.form-select#vehicleSelect option[value=""] {
+    background: linear-gradient(135deg, #dbeafe, #bfdbfe) !important;
+    color: #1e40af !important;
+    font-weight: bold !important;
+    font-style: italic;
+}
+
+/* Checkbox Group Styling */
+.stops-container {
+    background: #ffffff;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-top: 1rem;
+    border: 1px solid #e9ecef;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 0.75rem;
+    max-height: 350px;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background: white;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.checkbox-item:hover {
+    background: #2196F3;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79, 172, 254, 0.3);
+}
+
+.checkbox-item input[type="checkbox"] {
+    margin-right: 0.75rem;
+    transform: scale(1.3);
+    accent-color: #4facfe;
+}
+
+/* Info Cards */
+.info-alert {
+    background: #2196F3;
+    color: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border: none;
+    box-shadow: 0 8px 25px rgba(116, 185, 255, 0.3);
+}
+
+.info-alert .bi {
+    font-size: 1.5rem;
+    margin-right: 0.75rem;
+}
+
+/* Animations cho UI feedback */
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .trip-form-body {
+        padding: 2rem 1.5rem;
+    }
+    
+    .trip-form-header h2 {
+        font-size: 2rem;
+    }
+    
+    .checkbox-group {
+        grid-template-columns: 1fr;
+        max-height: 250px;
+    }
+    
+    .btn-create-trip {
+        padding: 0.875rem 2rem;
+        font-size: 1rem;
+    }
+}
+
+.form-control, .form-select {
+    padding: 0.75rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #2196F3;
+    box-shadow: 0 0 0 3px rgba(33,150,243,0.1);
+    outline: none;
+}
+
+.btn-create-trip {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.btn-create-trip:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(76,175,80,0.3);
+}
+
+.btn-cancel {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 20px;
+    margin-right: 1rem;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: #5a6268;
+    color: white;
+    text-decoration: none;
+}
+
+.stops-container {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 1rem;
+    background: white;
+}
+
+.stop-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.stop-item input[type="checkbox"] {
+    margin-right: 0.5rem;
+    transform: scale(1.2);
+}
+
+.time-input-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.status-select {
+    background-color: white;
+}
+
+@media (max-width: 768px) {
+    .trip-form-body {
+        padding: 1rem;
+    }
+    
+    .form-section {
+        padding: 1rem;
+    }
+    
+    .time-input-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="create-trip-container">
+    <div class="container">
+        <div class="trip-form-card">
+            <div class="trip-form-header">
+                <h2><i class="bi bi-bus-front me-3"></i>Tạo Chuyến Xe Mới</h2>
+                <p class="subtitle mb-0">Tạo lịch trình chuyến xe với thông tin chi tiết và chuyên nghiệp</p>
+            </div>
+            
+            <div class="trip-form-body">
+                <!-- Info Alert -->
+                <div class="info-alert">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <strong>Hướng dẫn tạo chuyến xe:</strong> 
+                    Vui lòng điền đầy đủ thông tin bắt buộc. Hệ thống sẽ tự động tạo mã chuyến và thiết lập ghế cho xe được chọn.
+                </div>
+                
+                <form method="POST" id="createTripForm" data-ajax="false">
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-info-circle"></i>
+                            Thông Tin Cơ Bản
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        Mã Lịch Trình <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="maLichTrinh" id="maLichTrinh"
+                                           value="{{ next_trip_id }}" readonly 
+                                           placeholder="Tự động tạo">
+                                    <small class="text-muted">Mã được tạo tự động</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        Chọn Tuyến Đường <span class="required">*</span>
+                                    </label>
+                                    <select class="form-select" name="maTuyenDuong" id="routeSelect" onchange="updateRouteInfo()" required>
+                                        <option value="">-- Chọn tuyến đường --</option>
+                                        {% for route in routes %}
+                                        <option value="{{ route.maTuyenDuong }}" 
+                                                data-start="{{ route.diemDau }}"
+                                                data-end="{{ route.diemCuoi }}"
+                                                data-distance="{{ route.doDai or '' }}"
+                                                data-duration="{{ route.thoiGianDi or '' }}"
+                                                data-name="{{ route.tenTuyenDuong }}">
+                                            {{ route.tenTuyenDuong }} ({{ route.diemDau }} → {{ route.diemCuoi }})
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle Selection -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-bus-front"></i>
+                            Chọn Xe Khach
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        Chọn Xe <span class="required">*</span>
+                                    </label>
+                                    <select class="form-select" name="maXe" id="vehicleSelect" onchange="updateVehicleInfo()" required>
+                                        <option value="">-- Chọn xe chạy tuyến --</option>
+                                        {% for vehicle in vehicles %}
+                                        <option value="{{ vehicle.maXeKhach }}" 
+                                                data-route="{{ vehicle.tuyen }}"
+                                                data-plate="{{ vehicle.bienSo }}"
+                                                data-type="{{ vehicle.maLoai }}"
+                                                data-brand="{{ vehicle.maHang }}">
+                                            {{ vehicle.ten }} ({{ vehicle.bienSo }}) - Tuyến: {{ vehicle.tuyen }} - Loại: {{ vehicle.maLoai }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <small class="text-muted">Chọn xe phù hợp với tuyến đã chọn</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Route Information -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-geo-alt"></i>
+                            Thông Tin Tuyến Đường
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        Điểm Đi <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="diemDi" id="diemDi" readonly 
+                                           placeholder="Sẽ tự động điền sau khi chọn tuyến" value="">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        Điểm Đến <span class="required">*</span>
+                                    </label>
+                                    <input type="text" class="form-control" name="diemDen" id="diemDen" readonly 
+                                           placeholder="Sẽ tự động điền sau khi chọn tuyến" value="">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="bi bi-geo"></i> Trạm Dừng (Chọn nhiều)
+                            </label>
+                            <div class="stops-container">
+                                {% for stop in stops %}
+                                <div class="stop-item">
+                                    <input type="checkbox" name="tramDung" value="{{ stop.maTramDung }}" 
+                                           id="stop{{ loop.index }}">
+                                    <label for="stop{{ loop.index }}">
+                                        {{ stop.tenTramDung }} - {{ stop.diaChi }}
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Schedule Information -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-calendar-event"></i>
+                            Thông Tin Lịch Trình
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        Ngày Đi <span class="required">*</span>
+                                    </label>
+                                    <input type="date" class="form-control" name="ngayDi" id="ngayDi"
+                                           min="{{ today }}" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        Giờ Đi <span class="required">*</span>
+                                    </label>
+                                    <input type="time" class="form-control" name="gioDi" id="gioDi" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Staff Information -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-people"></i>
+                            Thông Tin Nhân Viên
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        Tên Tài Xế <span class="required">*</span>
+                                    </label>
+                                    <select class="form-select" name="tenTaiXe" required>
+                                        <option value="">-- Chọn tài xế --</option>
+                                        {% for driver in drivers %}
+                                        <option value="{{ driver.ten }}">
+                                            {{ driver.ten }} - {{ driver.chucVu or 'Nhân viên' }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        Tên Phụ Xe
+                                    </label>
+                                    <select class="form-select" name="tenPhuXe">
+                                        <option value="">-- Chọn phụ xe (tùy chọn) --</option>
+                                        {% for driver in drivers %}
+                                        <option value="{{ driver.ten }}">
+                                            {{ driver.ten }} - {{ driver.chucVu or 'Nhân viên' }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="bi bi-gear"></i>
+                            Thông Tin Bổ Sung
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        Trạng Thái
+                                    </label>
+                                    <select class="form-select status-select" name="tinhTrang">
+                                        <option value="Chưa khởi hành" selected>Chưa khởi hành</option>
+                                        <option value="Đang chờ">Đang chờ</option>
+                                        <option value="Sẵn sàng">Sẵn sàng</option>
+                                        <option value="Đã khởi hành">Đã khởi hành</option>
+                                        <option value="Đã hoàn thành">Đã hoàn thành</option>
+                                        <option value="Đã hủy">Đã hủy</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">
+                                Mô Tả / Ghi Chú
+                            </label>
+                            <textarea class="form-control" name="moTa" rows="3" 
+                                      placeholder="Ghi chú về chuyến xe..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions text-center">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <a href="{{ url_for('admin.trip_list') }}" class="btn btn-secondary-custom w-100">
+                                    <i class="bi bi-arrow-left me-2"></i>Quay Lại
+                                </a>
+                            </div>
+                            <div class="col-md-9">
+                                <button type="submit" class="btn btn-create-trip" id="submitBtn">
+                                    <i class="bi bi-plus-circle me-2"></i>Tạo Chuyến Xe Mới
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Route selection handler - CẬP NHẬT VỚI API MỚI
+    window.updateRouteInfo = function() {
+        console.log('=== updateRouteInfo called ===');
+        
+        const routeSelect = document.getElementById('routeSelect');
+        if (!routeSelect) {
+            console.error('routeSelect not found');
+            return;
+        }
+        
+        const selectedOption = routeSelect.options[routeSelect.selectedIndex];
+        console.log('Selected route option:', selectedOption);
+        
+        if (selectedOption && selectedOption.value) {
+            const routeId = selectedOption.value;
+            console.log('Loading route info for:', routeId);
+            
+            // Hiện thị loading indicator
+            showLoadingIndicator('Tải thông tin tuyến...');
+            
+            // Gọi API để lấy thông tin tuyến
+            console.log('🔍 API Call URL:', `/admin/api/route-info/${routeId}`);
+            
+            fetch(`/admin/api/route-info/${routeId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'  // Include session cookies
+            })
+            .then(response => {
+                console.log('✅ API response status:', response.status);
+                
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        console.error('❌ API Error Response:', text);
+                        throw new Error(`API Error ${response.status}: ${text.substring(0, 200)}`);
+                    });
+                }
+                
+                return response.json();
+            })
+            .then(data => {
+                console.log('Route API data received:', data);
+                hideLoadingIndicator();
+                
+                // Auto-fill điểm đi và điểm đến theo logic mapping của danh sách chuyến xe
+                const diemDiInput = document.getElementById('diemDi');
+                const diemDenInput = document.getElementById('diemDen');
+                
+                if (diemDiInput && diemDenInput && data.diemDau && data.diemCuoi) {
+                    // Mapping: TuyenDuong.diemDau -> LichTrinh.diemDi
+                    diemDiInput.value = data.diemDau;
+                    // Mapping: TuyenDuong.diemCuoi -> LichTrinh.diemDen
+                    diemDenInput.value = data.diemCuoi;
+                    
+                    console.log('Auto-filled locations:', {
+                        diemDi: data.diemDau,
+                        diemDen: data.diemCuoi
+                    });
+                    
+                    // Visual feedback - Hiệu ứng màu xanh
+                    [diemDiInput, diemDenInput].forEach(input => {
+                        input.style.cssText = `
+                            background: linear-gradient(135deg, #10b981, #059669) !important;
+                            color: white !important;
+                            border: 3px solid #059669 !important;
+                            font-weight: bold !important;
+                            transform: scale(1.02);
+                            box-shadow: 0 0 15px rgba(16, 185, 129, 0.5);
+                        `;
+                    });
+                    
+                    // Reset styling sau 3 giây
+                    setTimeout(() => {
+                        [diemDiInput, diemDenInput].forEach(input => {
+                            input.style.cssText = '';
+                        });
+                    }, 3000);
+                    
+                    // Hiện thị thông báo thành công
+                    showSuccessMessage(`✅ Đã tự động điền: ${data.diemDau} → ${data.diemCuoi}`);
+                }
+                
+                // Lọc xe phù hợp với tuyến
+                if (data.matching_vehicles && data.matching_vehicles.length > 0) {
+                    filterVehiclesByRouteData(data.matching_vehicles, data.tenTuyenDuong);
+                } else {
+                    console.warn('No matching vehicles found for route:', data.tenTuyenDuong);
+                    resetVehicleOptions();
+                }
+                
+            })
+            .catch(error => {
+                console.error('Error loading route info:', error);
+                hideLoadingIndicator();
+                
+                // Check for specific authentication error
+                if (error.message.includes('401') || error.message.includes('Authentication required')) {
+                    showErrorMessage('🔒 Lỗi xác thực: Vui lòng đăng nhập lại làm Admin');
+                    setTimeout(() => {
+                        window.location.href = '/admin/dashboard';
+                    }, 3000);
+                } else {
+                    showErrorMessage('❌ Lỗi tải thông tin tuyến: ' + error.message);
+                }
+            });
+            
+        } else {
+            console.log('No route selected, clearing fields');
+            // Xóa dữ liệu khi không chọn tuyến
+            ['diemDi', 'diemDen'].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) input.value = '';
+            });
+            
+            resetVehicleOptions();
+        }
+    }
+    
+    // Vehicle selection handler - Global function
+    window.updateVehicleInfo = function() {
+        console.log('updateVehicleInfo called');
+        
+        const vehicleSelect = document.getElementById('vehicleSelect');
+        if (!vehicleSelect) {
+            console.error('vehicleSelect not found');
+            return;
+        }
+        
+        const selectedOption = vehicleSelect.options[vehicleSelect.selectedIndex];
+        
+        if (selectedOption && selectedOption.value) {
+            console.log('Selected vehicle:', selectedOption.value);
+            console.log('Vehicle route:', selectedOption.getAttribute('data-route'));
+            console.log('Vehicle type:', selectedOption.getAttribute('data-type'));
+            
+            // Visual feedback for vehicle selection
+            selectedOption.style.backgroundColor = '#d4edda';
+            setTimeout(() => {
+                selectedOption.style.backgroundColor = '';
+            }, 1500);
+        }
+    }
+    
+    // Hàm lọc xe dựa trên dữ liệu API - SỬ DỤNG LOGIC MAPPING ĐÚNG
+    function filterVehiclesByRouteData(matchingVehicles, routeName) {
+        const vehicleSelect = document.getElementById('vehicleSelect');
+        
+        if (!matchingVehicles || matchingVehicles.length === 0) {
+            resetVehicleOptions();
+            return;
+        }
+        
+        console.log('Filtering vehicles by API data:', {
+            routeName: routeName,
+            matchingCount: matchingVehicles.length
+        });
+        
+        // Tạo danh sách mã xe phù hợp
+        const matchingVehicleIds = new Set(matchingVehicles.map(v => v.maXeKhach));
+        let actualMatchingCount = 0;
+        
+        // Áp dụng style cho tất cả các option
+        Array.from(vehicleSelect.options).forEach(option => {
+            if (option.value && option.value !== '') {
+                const vehicleId = option.value;
+                const isMatching = matchingVehicleIds.has(vehicleId);
+                
+                if (isMatching) {
+                    // XE PHÙ HỢP - MÀU XANH RỰC RỠ!
+                    option.style.cssText = `
+                        background: linear-gradient(135deg, #059669, #047857) !important;
+                        color: white !important;
+                        font-weight: bold !important;
+                        font-size: 15px !important;
+                        padding: 12px 16px !important;
+                        border-radius: 8px !important;
+                        margin: 4px 0 !important;
+                        text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important;
+                        box-shadow: 0 4px 12px rgba(5, 150, 105, 0.4) !important;
+                        border: 3px solid #047857 !important;
+                        text-transform: uppercase !important;
+                        letter-spacing: 0.5px !important;
+                    `;
+                    actualMatchingCount++;
+                    console.log(`✅ MATCHING: ${option.textContent}`);
+                } else {
+                    // XE KHÔNG PHÙ HỢP - MÀU XANH NHẠT
+                    option.style.cssText = `
+                        background: linear-gradient(135deg, #f0f9ff, #e0f2fe) !important;
+                        color: #0369a1 !important;
+                        font-weight: normal !important;
+                        font-size: 13px !important;
+                        padding: 8px 12px !important;
+                        border-radius: 4px !important;
+                        margin: 2px 0 !important;
+                        opacity: 0.75 !important;
+                        border: 1px solid #bae6fd !important;
+                        font-style: italic !important;
+                    `;
+                    console.log(`🔵 NON-MATCHING: ${option.textContent}`);
+                }
+            }
+        });
+        
+        // Cập nhật header option với thông tin rõ ràng
+        const firstOption = vehicleSelect.querySelector('option[value=""]');
+        if (firstOption) {
+            if (actualMatchingCount > 0) {
+                firstOption.textContent = `✅ Chọn xe xanh phù hợp (${actualMatchingCount} xe)`;
+                firstOption.style.cssText = `
+                    background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
+                    color: white !important;
+                    font-weight: bold !important;
+                    font-size: 16px !important;
+                    padding: 15px !important;
+                    text-align: center !important;
+                    text-transform: uppercase !important;
+                    letter-spacing: 1px !important;
+                `;
+            } else {
+                firstOption.textContent = '⚠️ Không có xe phù hợp - Kiểm tra lại tuyến';
+                firstOption.style.cssText = `
+                    background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+                    color: white !important;
+                    font-weight: bold !important;
+                    font-size: 14px !important;
+                    padding: 12px !important;
+                    text-align: center !important;
+                `;
+            }
+        }
+        
+        // Hiện thị thông báo kết quả
+        if (actualMatchingCount > 0) {
+            showSuccessMessage(`🚗 Tìm thấy ${actualMatchingCount} xe xanh phù hợp tuyến: ${routeName}`);
+        } else {
+            showWarningMessage(`⚠️ Không có xe nào phù hợp với tuyến: ${routeName}`);
+        }
+        
+        console.log(`Found ${actualMatchingCount} matching vehicles for route: ${routeName}`);
+    }
+    
+    // FALLBACK: Filter vehicles based on selected route option (for compatibility)
+    function filterVehiclesByRoute(selectedRouteOption) {
+        console.log('Using fallback filterVehiclesByRoute');
+        
+        if (!selectedRouteOption || !selectedRouteOption.value) {
+            resetVehicleOptions();
+            return;
+        }
+        
+        const routeId = selectedRouteOption.value;
+        const routeName = selectedRouteOption.getAttribute('data-name') || selectedRouteOption.textContent;
+        
+        // Gọi API để lấy dữ liệu xe phù hợp
+        fetch(`/admin/api/route-info/${routeId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin'  // Include session cookies
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.matching_vehicles) {
+                filterVehiclesByRouteData(data.matching_vehicles, routeName);
+            } else {
+                console.warn('No matching vehicles in API response');
+                resetVehicleOptions();
+            }
+        })
+        .catch(error => {
+            console.error('Error in fallback filter:', error);
+            showErrorMessage('❌ Lỗi tải dữ liệu xe: ' + error.message);
+            resetVehicleOptions();
+        });
+    }
+    
+    // Extract route pattern helper function
+    function extractRoutePattern(routeText) {
+        if (!routeText) return null;
+        
+        // Common patterns: HCM-DL, TP.HCM-Đà Lạt, etc.
+        const patterns = {
+            'hcm': /tp\.?hcm|ho chi minh|sài gòn/i,
+            'dl': /đà lạt|da lat|lâm đồng/i,
+            'ct': /cần thơ|can tho/i,
+            'vt': /vũng tàu|vung tau/i,
+            'nt': /nha trang/i,
+            'dn': /đà nẵng|da nang/i,
+            'ag': /an giang/i,
+            'cm': /cà mau|ca mau/i
+        };
+        
+        for (const [code, pattern] of Object.entries(patterns)) {
+            if (pattern.test(routeText)) {
+                return code;
+            }
+        }
+        
+        return null;
+    }
+    
+    // Enhanced keyword extraction for better matching
+    function extractEnhancedKeywords(text) {
+        if (!text) return [];
+        
+        const normalized = text.toLowerCase()
+            .replace(/tp\.?/g, '')  // Remove "TP."
+            .replace(/[.,\-\s]+/g, ' ')  // Normalize separators
+            .trim();
+            
+        const keywords = normalized.split(/\s+/).filter(k => k.length > 1);
+        
+        // Add common abbreviations
+        const abbreviations = {
+            'hcm': ['ho chi minh', 'sai gon', 'saigon'],
+            'ct': ['can tho'],
+            'ag': ['an giang'],
+            'cm': ['ca mau'],
+            'dl': ['da lat'],
+            'vt': ['vung tau'],
+            'dn': ['da nang']
+        };
+        
+        const expanded = [...keywords];
+        keywords.forEach(keyword => {
+            if (abbreviations[keyword]) {
+                expanded.push(...abbreviations[keyword]);
+            }
+            
+            // Reverse lookup
+            Object.entries(abbreviations).forEach(([abbr, full]) => {
+                if (full.some(f => f.includes(keyword))) {
+                    expanded.push(abbr);
+                }
+            });
+        });
+        
+        return expanded;
+    }
+    
+    // Reset vehicle options styling
+    function resetVehicleOptions() {
+        const vehicleSelect = document.getElementById('vehicleSelect');
+        Array.from(vehicleSelect.options).forEach(option => {
+            // Reset tất cả styling
+            option.style.cssText = '';
+        });
+        
+        // Reset header option
+        const firstOption = vehicleSelect.querySelector('option[value=""]');
+        if (firstOption) {
+            firstOption.textContent = '-- Chọn xe chạy tuyến --';
+            firstOption.style.cssText = '';
+        }
+        
+        console.log('Vehicle options reset');
+    }
+    
+    // UI Feedback Functions - THÊM CÁC HÀM MỚI
+    function showLoadingIndicator(message) {
+        // Tạo hoặc cập nhật loading indicator
+        let indicator = document.getElementById('loading-indicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'loading-indicator';
+            indicator.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 10px;
+                z-index: 1000;
+                box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+                font-weight: bold;
+                animation: pulse 2s infinite;
+            `;
+            document.body.appendChild(indicator);
+        }
+        indicator.textContent = '⌛ ' + message;
+        indicator.style.display = 'block';
+    }
+    
+    function hideLoadingIndicator() {
+        const indicator = document.getElementById('loading-indicator');
+        if (indicator) {
+            indicator.style.display = 'none';
+        }
+    }
+    
+    function showSuccessMessage(message) {
+        showToast(message, 'success');
+    }
+    
+    function showErrorMessage(message) {
+        showToast(message, 'error');
+    }
+    
+    function showWarningMessage(message) {
+        showToast(message, 'warning');
+    }
+    
+    function showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            max-width: 400px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: bold;
+            z-index: 1001;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease;
+        `;
+        
+        // Màu theo loại thông báo
+        const colors = {
+            success: 'linear-gradient(135deg, #10b981, #059669)',
+            error: 'linear-gradient(135deg, #ef4444, #dc2626)',
+            warning: 'linear-gradient(135deg, #f59e0b, #d97706)',
+            info: 'linear-gradient(135deg, #3b82f6, #1d4ed8)'
+        };
+        
+        toast.style.background = colors[type] || colors.info;
+        toast.textContent = message;
+        
+        document.body.appendChild(toast);
+        
+        // Tự động ẩn sau 4 giây
+        setTimeout(() => {
+            toast.style.animation = 'slideOut 0.3s ease';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
+                }
+            }, 300);
+        }, 4000);
+    }
+
+    // Initialize form function
+    function initializeForm() {
+        // Auto-generate trip ID
+        const maLichTrinhInput = document.querySelector('input[name="maLichTrinh"]');
+        
+        const generateTripId = () => {
+            const now = new Date();
+            // Use timestamp for uniqueness
+            const timestamp = now.getTime();
+            // Add random suffix for extra uniqueness
+            const randomSuffix = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return `LT${timestamp}${randomSuffix}`;
+        };
+    
+        // Always generate new ID when page loads (force refresh)
+        if (maLichTrinhInput) {
+            console.log('🔍 Current trip ID field value:', maLichTrinhInput.value);
+            const newTripId = generateTripId();
+            maLichTrinhInput.value = newTripId;
+            console.log('🆕 Generated new trip ID:', newTripId);
+            console.log('✅ Updated field value to:', maLichTrinhInput.value);
+            
+            // Add regenerate button if not exists
+            if (!document.getElementById('regenTripBtn')) {
+                const regenBtn = document.createElement('button');
+                regenBtn.id = 'regenTripBtn';
+                regenBtn.type = 'button';
+                regenBtn.className = 'btn btn-outline-secondary btn-sm ms-2';
+                regenBtn.innerHTML = '🔄 Tạo mới';
+                regenBtn.title = 'Tạo mã lịch trình mới';
+                
+                regenBtn.addEventListener('click', function() {
+                    const newId = generateTripId();
+                    maLichTrinhInput.value = newId;
+                    console.log('🔄 Regenerated trip ID:', newId);
+                    
+                    // Show success message
+                    showToast('Đã tạo mã lịch trình mới: ' + newId, 'success');
+                });
+                
+                // Insert button after input
+                const inputGroup = maLichTrinhInput.parentNode;
+                if (inputGroup.classList.contains('input-group')) {
+                    inputGroup.appendChild(regenBtn);
+                } else {
+                    // Wrap in input group if not already
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'input-group';
+                    maLichTrinhInput.parentNode.insertBefore(wrapper, maLichTrinhInput);
+                    wrapper.appendChild(maLichTrinhInput);
+                    wrapper.appendChild(regenBtn);
+                }
+            }
+        }
+        
+        // Update route info when vehicle is selected
+        const vehicleSelect = document.querySelector('select[name="maXe"]');
+        if (vehicleSelect) {
+            vehicleSelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const route = selectedOption.getAttribute('data-route');
+                    console.log('Selected vehicle route:', route);
+                }
+            });
+        }
+    }
+    
+    // Set minimum date to today code - wrapped in DOMContentLoaded
+    function initAdditionalFeatures() {
+        // Set minimum date to today
+        const ngayDiInput = document.querySelector('input[name="ngayDi"]');
+        if (ngayDiInput) {
+            const today = new Date().toISOString().split('T')[0];
+            ngayDiInput.value = today;
+        }
+        
+        // Form validation
+        const form = document.getElementById('createTripForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const requiredFields = ['maLichTrinh', 'maXe', 'diemDi', 'diemDen', 'gioDi', 'ngayDi'];
+                let isValid = true;
+                
+                requiredFields.forEach(field => {
+                    const input = form.querySelector(`[name="${field}"]`);
+                    if (input && !input.value.trim()) {
+                        input.style.borderColor = '#e74c3c';
+                        isValid = false;
+                    } else if (input) {
+                        input.style.borderColor = '#e9ecef';
+                    }
+                });
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+                }
+            });
+        }
+        
+        // Smooth animations
+        const formSections = document.querySelectorAll('.form-section');
+        formSections.forEach((section, index) => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                section.style.transition = 'all 0.5s ease';
+                section.style.opacity = '1';
+                section.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    }
+    
+    // ENHANCED ERROR HANDLING AND RETRY MECHANISM
+    
+    // Global error handler with user notification
+    window.addEventListener('error', function(e) {
+        console.error('JavaScript Error:', e.error);
+        console.error('File:', e.filename, 'Line:', e.lineno);
+        
+        // Show user-friendly error message
+        const errorMsg = document.createElement('div');
+        errorMsg.className = 'alert alert-warning alert-dismissible fade show';
+        errorMsg.style.position = 'fixed';
+        errorMsg.style.top = '20px';
+        errorMsg.style.right = '20px';
+        errorMsg.style.zIndex = '9999';
+        errorMsg.innerHTML = `
+            <strong>⚠️ Lỗi JavaScript:</strong> Một số tính năng có thể không hoạt động. 
+            <button class="btn btn-sm btn-outline-warning ms-2" onclick="location.reload()">
+                🔄 Refresh trang
+            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(errorMsg);
+        
+        // Auto remove after 10 seconds
+        setTimeout(() => {
+            if (errorMsg.parentNode) {
+                errorMsg.remove();
+            }
+        }, 10000);
+    });
+    
+    // Handle unhandled promise rejections
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('Unhandled Promise Rejection:', e.reason);
+        
+        // Show user notification for data loading errors
+        if (e.reason && e.reason.message && e.reason.message.includes('fetch')) {
+            showDataLoadingError('Lỗi tải dữ liệu. Vui lòng thử lại!');
+        }
+    });
+    
+    // Function to show data loading errors
+    function showDataLoadingError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger alert-dismissible fade show';
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.top = '80px';
+        errorDiv.style.right = '20px';
+        errorDiv.style.zIndex = '9999';
+        errorDiv.style.maxWidth = '400px';
+        errorDiv.innerHTML = `
+            <strong>❌ ${message}</strong><br>
+            <small>Có thể do:</small>
+            <ul style="margin: 5px 0; padding-left: 20px; font-size: 12px;">
+                <li>Kết nối mạng chậm</li>
+                <li>Server đang bận</li>
+                <li>Cache browser cũ</li>
+            </ul>
+            <button class="btn btn-sm btn-danger" onclick="location.reload()">
+                🔄 Refresh ngay
+            </button>
+            <button class="btn btn-sm btn-outline-danger ms-1" onclick="this.closest('.alert').remove()">
+                ✕ Đóng
+            </button>
+        `;
+        
+        document.body.appendChild(errorDiv);
+        
+        // Auto remove after 15 seconds
+        setTimeout(() => {
+            if (errorDiv.parentNode) {
+                errorDiv.remove();
+            }
+        }, 15000);
+    }
+    
+    // Enhanced form submission with error handling
+    function handleFormSubmission() {
+        const form = document.getElementById('createTripForm');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        if (form && submitBtn) {
+            form.addEventListener('submit', function(e) {
+                try {
+                    // Show loading state
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Đang lưu...';
+                    
+                    // Add timeout protection
+                    const timeoutId = setTimeout(() => {
+                        if (submitBtn.disabled) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = '<i class="bi bi-plus-circle me-2"></i>Tạo Chuyến Xe Mới';
+                            showDataLoadingError('Quá thời gian chờ. Vui lòng thử lại!');
+                        }
+                    }, 30000); // 30 second timeout
+                    
+                    // Clear timeout when page unloads (successful submission)
+                    window.addEventListener('beforeunload', () => clearTimeout(timeoutId));
+                    
+                } catch (error) {
+                    console.error('Form submission setup error:', error);
+                    e.preventDefault();
+                    showDataLoadingError('Lỗi chuẩn bị form. Vui lòng refresh trang!');
+                }
+            });
+        }
+    }
+    
+    // Prevent form double submission with enhanced error handling
+    window.preventDoubleSubmit = function() {
+        const form = document.getElementById('createTripForm');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        if (form && submitBtn) {
+            form.addEventListener('submit', function(e) {
+                // Disable submit button to prevent double submission
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>\u0110ang t\u1ea1o...';
+                
+                // Re-enable after delay (fallback)
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="bi bi-plus-circle me-2"></i>T\u1ea1o Chuy\u1ebfn Xe M\u1edbi';
+                }, 5000);
+            });
+        }
+    };
+    
+    // Check authentication status on page load
+    function checkAuthenticationStatus() {
+        return fetch('/admin/dashboard', {
+            method: 'GET',
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('✅ Authentication verified');
+                return true;
+            } else if (response.status === 302 || response.status === 401 || response.status === 403) {
+                console.warn('❌ Authentication failed');
+                showErrorMessage('🔒 Phiên đăng nhập đã hết hạn. Đang chuyển hướng...');
+                setTimeout(() => {
+                    window.location.href = '/admin/dashboard';
+                }, 2000);
+                return false;
+            }
+            return true;
+        })
+        .catch(error => {
+            console.warn('Authentication check failed:', error);
+            return true; // Continue anyway
+        });
+    }
+
+    // Initialize form when DOM is loaded with enhanced error handling
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            // Check authentication first
+            checkAuthenticationStatus().then(isAuthenticated => {
+                if (isAuthenticated) {
+                    initializeForm();
+                    initAdditionalFeatures();
+                    preventDoubleSubmit();
+                    handleFormSubmission();
+                    console.log('✅ Create trip form initialized successfully');
+                    
+                    // Show success message for initialization
+                    const successDiv = document.createElement('div');
+            successDiv.className = 'alert alert-success alert-dismissible fade show';
+            successDiv.style.position = 'fixed';
+            successDiv.style.bottom = '20px';
+            successDiv.style.right = '20px';
+            successDiv.style.zIndex = '9999';
+            successDiv.innerHTML = `
+                <strong>✅ Form đã sẵn sàng!</strong> 
+                Bạn có thể tạo chuyến xe mới.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(successDiv);
+            
+            // Auto remove after 3 seconds
+                    setTimeout(() => {
+                        if (successDiv.parentNode) {
+                            successDiv.remove();
+                        }
+                    }, 3000);
+                    
+                } else {
+                    console.log('❌ Authentication failed, skipping form initialization');
+                }
+            });
+            
+        } catch (error) {
+            console.error('❌ Error initializing form:', error);
+            showDataLoadingError('Lỗi khởi tạo form. Vui lòng refresh trang!');
+        }
+    });
+</script>
+{% endblock %}

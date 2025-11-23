@@ -1,0 +1,913 @@
+{% extends 'base.html' %}
+
+{% block title %}Tuyến Đường - XeKhach.com{% endblock %}
+
+{% block styles %}
+<style>
+:root {
+    --primary-color: #003b95;
+    --primary-dark: #002d75;
+    --accent-yellow: #ffd700;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --light-bg: #f8f9fa;
+}
+
+.page-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+}
+
+.route-section {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.route-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.route-title {
+    margin: 0;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.route-info {
+    color: #6c757d;
+    margin: 0.5rem 0 0 0;
+}
+
+.trip-list {
+    padding: 0;
+}
+
+.trip-item {
+    padding: 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.trip-item:last-child {
+    border-bottom: none;
+}
+
+.trip-item:hover {
+    background-color: #f8f9fa;
+}
+
+.trip-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.trip-route {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.trip-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--success-color);
+}
+
+.trip-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6c757d;
+}
+
+.detail-item i {
+    color: var(--primary-color);
+    font-size: 0.9rem;
+}
+
+.trip-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-sap-chay {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-dang-chay {
+    background: #d4edda;
+    color: #155724;
+}
+
+.seats-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: #e3f2fd;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    color: var(--primary-color);
+}
+
+.empty-routes {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6c757d;
+}
+
+.empty-routes i {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+/* Filter Sidebar Styles */
+.filter-sidebar {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    padding: 0;
+    overflow: hidden;
+    position: sticky;
+    top: 20px;
+}
+
+.filter-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filter-header .btn {
+    color: white;
+    border-color: rgba(255,255,255,0.3);
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+}
+
+.filter-header .btn:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.5);
+}
+
+.filter-section {
+    padding: 1rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.filter-section:last-child {
+    border-bottom: none;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+    display: block;
+    font-size: 0.9rem;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    padding-right: 2.5rem;
+}
+
+.search-box i {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+}
+
+.price-range {
+    position: relative;
+}
+
+.price-range input[type="range"] {
+    width: 100%;
+    margin: 0.5rem 0;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: #ddd;
+    border-radius: 2px;
+}
+
+.price-range input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.price-range input[type="range"]::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+.price-display {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-check-label {
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.sort-options select {
+    min-width: 180px;
+}
+
+/* Filter Results */
+.route-section.filtered-out {
+    display: none !important;
+}
+
+.trip-item.filtered-out {
+    display: none !important;
+}
+
+/* Mobile Responsive */
+@media (max-width: 991.98px) {
+    .filter-sidebar {
+        position: static;
+        margin-bottom: 2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .trip-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+    
+    .trip-details {
+        grid-template-columns: 1fr;
+    }
+    
+    .trip-actions {
+        justify-content: stretch;
+    }
+    
+    .trip-actions .btn {
+        flex: 1;
+    }
+    
+    .sort-options {
+        margin-top: 1rem;
+    }
+    
+    .sort-options select {
+        width: 100%;
+        min-width: auto;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    <i class="bi bi-signpost-2"></i> Tuyến Đường
+                </h1>
+                <p class="mb-0 opacity-75">
+                    Danh sách các tuyến đường và chuyến xe khả dụng
+                </p>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <a href="{{ url_for('user.index') }}" class="btn btn-outline-light">
+                    <i class="bi bi-house"></i> Trang chủ
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    {% if routes_with_trips %}
+        <div class="row">
+            <!-- Filter Sidebar -->
+            <div class="col-lg-3 col-md-4 mb-4">
+                <div class="filter-sidebar">
+                    <div class="filter-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-funnel"></i> Bộ lọc
+                        </h5>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="clearAllFilters()">
+                            <i class="bi bi-arrow-clockwise"></i> Xóa bộ lọc
+                        </button>
+                    </div>
+                    
+                    <!-- Search Box -->
+                    <div class="filter-section">
+                        <label class="filter-label">Tìm kiếm tuyến đường</label>
+                        <div class="search-box">
+                            <input type="text" id="routeSearch" class="form-control" 
+                                   placeholder="Nhập tên tuyến, điểm đi/đến..." 
+                                   onkeyup="applyFilters()">
+                            <i class="bi bi-search"></i>
+                        </div>
+                    </div>
+                    
+                    <!-- Departure Location Filter -->
+                    <div class="filter-section">
+                        <label class="filter-label">Điểm đi</label>
+                        <select id="departureFilter" class="form-select" onchange="applyFilters()">
+                            <option value="">Tất cả điểm đi</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Destination Filter -->
+                    <div class="filter-section">
+                        <label class="filter-label">Điểm đến</label>
+                        <select id="destinationFilter" class="form-select" onchange="applyFilters()">
+                            <option value="">Tất cả điểm đến</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Date Filter -->
+                    <div class="filter-section">
+                        <label class="filter-label">Ngày khởi hành</label>
+                        <input type="date" id="dateFilter" class="form-control" onchange="applyFilters()">
+                    </div>
+                    
+                    <!-- Price Range Filter -->
+                    <div class="filter-section">
+                        <label class="filter-label">Khoảng giá</label>
+                        <div class="price-range">
+                            <input type="range" id="priceRangeMin" class="form-range" min="0" max="1000000" step="50000" value="0" onchange="updatePriceRange()">
+                            <input type="range" id="priceRangeMax" class="form-range" min="0" max="1000000" step="50000" value="1000000" onchange="updatePriceRange()">
+                            <div class="price-display">
+                                <span id="priceMin">0đ</span> - <span id="priceMax">1,000,000đ</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vehicle Type Filter -->
+                    <div class="filter-section">
+                        <label class="filter-label">Loại xe</label>
+                        <div class="checkbox-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="vehicleVIP30" value="VIP30" onchange="applyFilters()">
+                                <label class="form-check-label" for="vehicleVIP30">VIP 30 chỗ</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="vehicleVIP45" value="VIP45" onchange="applyFilters()">
+                                <label class="form-check-label" for="vehicleVIP45">VIP 45 chỗ</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="vehicleSTD" value="Standard" onchange="applyFilters()">
+                                <label class="form-check-label" for="vehicleSTD">Xe thường</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Filter -->
+                    <div class="filter-section">
+                        <label class="filter-label">Trạng thái</label>
+                        <div class="checkbox-group">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="statusSapChay" value="Sắp chạy" onchange="applyFilters()">
+                                <label class="form-check-label" for="statusSapChay">Sắp chạy</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="statusDangChay" value="Đang chạy" onchange="applyFilters()">
+                                <label class="form-check-label" for="statusDangChay">Đang chạy</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Available Seats Filter -->
+                    <div class="filter-section">
+                        <label class="filter-label">Ghế trống tối thiểu</label>
+                        <select id="seatsFilter" class="form-select" onchange="applyFilters()">
+                            <option value="0">Tất cả</option>
+                            <option value="1">Ít nhất 1 ghế</option>
+                            <option value="5">Ít nhất 5 ghế</option>
+                            <option value="10">Ít nhất 10 ghế</option>
+                            <option value="15">Ít nhất 15 ghế</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Routes Content -->
+            <div class="col-lg-9 col-md-8">
+                <div class="mb-4 d-flex justify-content-between align-items-center">
+                    <h5 class="text-muted mb-0">
+                        <i class="bi bi-info-circle"></i> 
+                        <span id="resultsCount">{{ routes_with_trips|length }}</span> tuyến đường có chuyến xe khả dụng
+                    </h5>
+                    <div class="sort-options">
+                        <label class="me-2">Sắp xếp:</label>
+                        <select id="sortOptions" class="form-select form-select-sm d-inline-block" style="width: auto;" onchange="sortResults()">
+                            <option value="name">Tên tuyến A-Z</option>
+                            <option value="price-low">Giá thấp → cao</option>
+                            <option value="price-high">Giá cao → thấp</option>
+                            <option value="date">Ngày khởi hành</option>
+                            <option value="seats">Ghế trống nhiều nhất</option>
+                        </select>
+                    </div>
+                </div>
+                
+                {% for route_data in routes_with_trips %}
+                <div class="route-section">
+                    <div class="route-header">
+                        <h3 class="route-title">
+                            <i class="bi bi-geo-alt"></i> 
+                            {{ route_data.tuyen.tenTuyenDuong or 'Tuyến không tên' }}
+                        </h3>
+                        <div class="route-info">
+                            <i class="bi bi-arrow-right-circle"></i>
+                            {{ route_data.tuyen.diemDau }} → {{ route_data.tuyen.diemCuoi }}
+                            {% if route_data.tuyen.doDai %}
+                                • Khoảng cách: {{ route_data.tuyen.doDai }} km
+                            {% endif %}
+                            {% if route_data.tuyen.thoiGianDi %}
+                                • Thời gian: {{ route_data.tuyen.thoiGianDi }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="trip-list">
+                        {% for trip in route_data.trips %}
+                        <div class="trip-item">
+                            <div class="trip-header">
+                                <div class="trip-route">
+                                    {{ trip.diemDi }} → {{ trip.diemDen }}
+                                </div>
+                                <div class="trip-price">
+                                    {% if trip.gia_ve > 0 %}
+                                        {{ "{:,.0f}".format(trip.gia_ve) }}₫
+                                    {% else %}
+                                        Liên hệ
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="trip-details">
+                                <div class="detail-item">
+                                    <i class="bi bi-calendar3"></i>
+                                    {% if trip.ngayDi %}
+                                        {{ trip.ngayDi.strftime('%d/%m/%Y') if trip.ngayDi else 'Không xác định' }}
+                                    {% else %}
+                                        Không xác định
+                                    {% endif %}
+                                </div>
+                                <div class="detail-item">
+                                    <i class="bi bi-clock"></i>
+                                    {{ trip.gioDi or 'Không xác định' }}
+                                </div>
+                                <div class="detail-item">
+                                    <i class="bi bi-bus-front"></i>
+                                    {% if trip.xe_info %}
+                                        {{ trip.xe_info.ten or trip.xe_info.bienSo or 'Xe khách' }}
+                                        {% if trip.xe_info.maLoai %}
+                                            ({{ trip.xe_info.maLoai }})
+                                        {% endif %}
+                                    {% else %}
+                                        Xe khách
+                                    {% endif %}
+                                </div>
+                                <div class="detail-item">
+                                    <i class="bi bi-person-check"></i>
+                                    {% if trip.tenTaiXe %}
+                                        Tài xế: {{ trip.tenTaiXe }}
+                                    {% else %}
+                                        Tài xế: Chưa phân công
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex gap-2 align-items-center">
+                                    <span class="status-badge status-{{ trip.tinhTrang|lower|replace(' ', '-')|replace('ắ', 'a')|replace('ạ', 'a') }}">
+                                        {{ trip.tinhTrang }}
+                                    </span>
+                                    {% if trip.ghe_trong is defined and trip.total_seats > 0 %}
+                                        <div class="seats-info">
+                                            <i class="bi bi-person"></i>
+                                            {{ trip.ghe_trong }}/{{ trip.total_seats }} ghế trống
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="trip-actions">
+                                    <a href="{{ url_for('user.booking', lich_trinh_id=trip.maLichTrinh) }}" 
+                                       class="btn btn-primary">
+                                        <i class="bi bi-ticket"></i> Đặt vé
+                                    </a>
+                                    <button class="btn btn-outline-primary" 
+                                            onclick="viewTripDetails('{{ trip.maLichTrinh }}')">
+                                        <i class="bi bi-info-circle"></i> Chi tiết
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <div class="empty-routes">
+            <i class="bi bi-signpost-split"></i>
+            <h3>Không có tuyến đường khả dụng</h3>
+            <p>Hiện tại chưa có tuyến đường nào có chuyến xe khả dụng.</p>
+            <a href="{{ url_for('user.index') }}" class="btn btn-primary mt-3">
+                <i class="bi bi-house"></i> Về trang chủ
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Trip Details Modal -->
+<div class="modal fade" id="tripDetailsModal" tabindex="-1" aria-labelledby="tripDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tripDetailsModalLabel">Chi tiết chuyến xe</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="tripDetailsContent">
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Đang tải...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Initialize filters when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    populateFilterOptions();
+    updatePriceRange();
+});
+
+function populateFilterOptions() {
+    const routeSections = document.querySelectorAll('.route-section');
+    const departureSet = new Set();
+    const destinationSet = new Set();
+    
+    routeSections.forEach(section => {
+        const tripItems = section.querySelectorAll('.trip-item');
+        tripItems.forEach(item => {
+            const routeText = item.querySelector('.trip-route').textContent;
+            const [departure, destination] = routeText.split(' → ');
+            if (departure) departureSet.add(departure.trim());
+            if (destination) destinationSet.add(destination.trim());
+        });
+    });
+    
+    // Populate departure filter
+    const departureFilter = document.getElementById('departureFilter');
+    departureSet.forEach(location => {
+        const option = document.createElement('option');
+        option.value = location;
+        option.textContent = location;
+        departureFilter.appendChild(option);
+    });
+    
+    // Populate destination filter
+    const destinationFilter = document.getElementById('destinationFilter');
+    destinationSet.forEach(location => {
+        const option = document.createElement('option');
+        option.value = location;
+        option.textContent = location;
+        destinationFilter.appendChild(option);
+    });
+}
+
+function updatePriceRange() {
+    const minRange = document.getElementById('priceRangeMin');
+    const maxRange = document.getElementById('priceRangeMax');
+    const minDisplay = document.getElementById('priceMin');
+    const maxDisplay = document.getElementById('priceMax');
+    
+    const minValue = parseInt(minRange.value);
+    const maxValue = parseInt(maxRange.value);
+    
+    // Ensure min doesn't exceed max
+    if (minValue >= maxValue) {
+        minRange.value = maxValue - 50000;
+    }
+    
+    minDisplay.textContent = parseInt(minRange.value).toLocaleString('vi-VN') + 'đ';
+    maxDisplay.textContent = parseInt(maxRange.value).toLocaleString('vi-VN') + 'đ';
+    
+    applyFilters();
+}
+
+function applyFilters() {
+    const searchTerm = document.getElementById('routeSearch').value.toLowerCase();
+    const departureFilter = document.getElementById('departureFilter').value;
+    const destinationFilter = document.getElementById('destinationFilter').value;
+    const dateFilter = document.getElementById('dateFilter').value;
+    const minPrice = parseInt(document.getElementById('priceRangeMin').value);
+    const maxPrice = parseInt(document.getElementById('priceRangeMax').value);
+    const seatsFilter = parseInt(document.getElementById('seatsFilter').value);
+    
+    // Get selected vehicle types
+    const vehicleTypes = [];
+    if (document.getElementById('vehicleVIP30').checked) vehicleTypes.push('VIP30');
+    if (document.getElementById('vehicleVIP45').checked) vehicleTypes.push('VIP45');
+    if (document.getElementById('vehicleSTD').checked) vehicleTypes.push('Standard');
+    
+    // Get selected statuses
+    const statuses = [];
+    if (document.getElementById('statusSapChay').checked) statuses.push('Sắp chạy');
+    if (document.getElementById('statusDangChay').checked) statuses.push('Đang chạy');
+    
+    const routeSections = document.querySelectorAll('.route-section');
+    let visibleRoutes = 0;
+    
+    routeSections.forEach(section => {
+        const routeTitle = section.querySelector('.route-title').textContent.toLowerCase();
+        const routeInfo = section.querySelector('.route-info').textContent.toLowerCase();
+        const tripItems = section.querySelectorAll('.trip-item');
+        
+        let hasVisibleTrips = false;
+        
+        // Check if route matches search
+        const matchesSearch = searchTerm === '' || 
+                             routeTitle.includes(searchTerm) || 
+                             routeInfo.includes(searchTerm);
+        
+        if (matchesSearch) {
+            tripItems.forEach(item => {
+                let isVisible = true;
+                
+                // Filter by route
+                const routeText = item.querySelector('.trip-route').textContent;
+                const [departure, destination] = routeText.split(' → ');
+                
+                if (departureFilter && departure.trim() !== departureFilter) isVisible = false;
+                if (destinationFilter && destination.trim() !== destinationFilter) isVisible = false;
+                
+                // Filter by date
+                if (dateFilter) {
+                    const tripDateElement = item.querySelector('.detail-item i.bi-calendar3').parentElement;
+                    const tripDateText = tripDateElement.textContent.trim();
+                    const tripDate = tripDateText.split(' ')[1]; // Get date part
+                    if (tripDate) {
+                        const [day, month, year] = tripDate.split('/');
+                        const tripDateFormatted = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+                        if (tripDateFormatted !== dateFilter) isVisible = false;
+                    }
+                }
+                
+                // Filter by price
+                const priceElement = item.querySelector('.trip-price');
+                if (priceElement) {
+                    const priceText = priceElement.textContent.replace(/[^\d]/g, '');
+                    const price = parseInt(priceText) || 0;
+                    if (price < minPrice || price > maxPrice) isVisible = false;
+                }
+                
+                // Filter by vehicle type
+                if (vehicleTypes.length > 0) {
+                    const vehicleInfo = item.querySelector('.detail-item i.bi-bus-front').parentElement.textContent;
+                    let hasMatchingVehicle = false;
+                    vehicleTypes.forEach(type => {
+                        if (vehicleInfo.includes(type)) hasMatchingVehicle = true;
+                    });
+                    if (!hasMatchingVehicle) isVisible = false;
+                }
+                
+                // Filter by status
+                if (statuses.length > 0) {
+                    const statusElement = item.querySelector('.status-badge');
+                    if (statusElement) {
+                        const status = statusElement.textContent.trim();
+                        if (!statuses.includes(status)) isVisible = false;
+                    }
+                }
+                
+                // Filter by available seats
+                if (seatsFilter > 0) {
+                    const seatsInfo = item.querySelector('.seats-info');
+                    if (seatsInfo) {
+                        const seatsText = seatsInfo.textContent;
+                        const availableSeats = parseInt(seatsText.split('/')[0]) || 0;
+                        if (availableSeats < seatsFilter) isVisible = false;
+                    }
+                }
+                
+                // Show/hide trip
+                if (isVisible) {
+                    item.classList.remove('filtered-out');
+                    hasVisibleTrips = true;
+                } else {
+                    item.classList.add('filtered-out');
+                }
+            });
+        }
+        
+        // Show/hide entire route section
+        if (hasVisibleTrips && matchesSearch) {
+            section.classList.remove('filtered-out');
+            visibleRoutes++;
+        } else {
+            section.classList.add('filtered-out');
+        }
+    });
+    
+    // Update results count
+    document.getElementById('resultsCount').textContent = visibleRoutes;
+}
+
+function sortResults() {
+    const sortBy = document.getElementById('sortOptions').value;
+    const container = document.querySelector('.col-lg-9');
+    const routeSections = Array.from(container.querySelectorAll('.route-section:not(.filtered-out)'));
+    
+    routeSections.sort((a, b) => {
+        switch(sortBy) {
+            case 'name':
+                const nameA = a.querySelector('.route-title').textContent.toLowerCase();
+                const nameB = b.querySelector('.route-title').textContent.toLowerCase();
+                return nameA.localeCompare(nameB);
+                
+            case 'price-low':
+            case 'price-high':
+                const getPriceFromSection = (section) => {
+                    const priceElements = section.querySelectorAll('.trip-price');
+                    let minPrice = Infinity;
+                    priceElements.forEach(el => {
+                        const price = parseInt(el.textContent.replace(/[^\d]/g, '')) || 0;
+                        if (price > 0 && price < minPrice) minPrice = price;
+                    });
+                    return minPrice === Infinity ? 0 : minPrice;
+                };
+                
+                const priceA = getPriceFromSection(a);
+                const priceB = getPriceFromSection(b);
+                return sortBy === 'price-low' ? priceA - priceB : priceB - priceA;
+                
+            case 'date':
+                // Sort by earliest trip date in each route
+                const getEarliestDate = (section) => {
+                    const dateElements = section.querySelectorAll('.detail-item i.bi-calendar3');
+                    let earliestDate = new Date('9999-12-31');
+                    dateElements.forEach(el => {
+                        const dateText = el.parentElement.textContent.trim().split(' ')[1];
+                        if (dateText) {
+                            const [day, month, year] = dateText.split('/');
+                            const date = new Date(year, month - 1, day);
+                            if (date < earliestDate) earliestDate = date;
+                        }
+                    });
+                    return earliestDate;
+                };
+                
+                return getEarliestDate(a) - getEarliestDate(b);
+                
+            case 'seats':
+                const getMaxSeats = (section) => {
+                    const seatElements = section.querySelectorAll('.seats-info');
+                    let maxSeats = 0;
+                    seatElements.forEach(el => {
+                        const seats = parseInt(el.textContent.split('/')[0]) || 0;
+                        if (seats > maxSeats) maxSeats = seats;
+                    });
+                    return maxSeats;
+                };
+                
+                return getMaxSeats(b) - getMaxSeats(a); // Descending order
+        }
+        return 0;
+    });
+    
+    // Re-append sorted elements
+    const resultsHeader = container.querySelector('.mb-4');
+    routeSections.forEach(section => {
+        container.appendChild(section);
+    });
+    
+    // Keep results header at top
+    if (resultsHeader) {
+        container.insertBefore(resultsHeader, container.firstChild);
+    }
+}
+
+function clearAllFilters() {
+    // Reset all form inputs
+    document.getElementById('routeSearch').value = '';
+    document.getElementById('departureFilter').value = '';
+    document.getElementById('destinationFilter').value = '';
+    document.getElementById('dateFilter').value = '';
+    document.getElementById('priceRangeMin').value = 0;
+    document.getElementById('priceRangeMax').value = 1000000;
+    document.getElementById('seatsFilter').value = 0;
+    
+    // Uncheck all checkboxes
+    document.querySelectorAll('.filter-section input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
+    });
+    
+    // Reset sort
+    document.getElementById('sortOptions').value = 'name';
+    
+    // Update display and apply filters
+    updatePriceRange();
+    applyFilters();
+    sortResults();
+}
+
+function viewTripDetails(tripId) {
+    const modal = new bootstrap.Modal(document.getElementById('tripDetailsModal'));
+    const content = document.getElementById('tripDetailsContent');
+    
+    // Show loading
+    content.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // Fetch trip details (you can implement this API endpoint)
+    fetch(`/api/trip-details/${tripId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                content.innerHTML = data.html;
+            } else {
+                content.innerHTML = '<p class="text-danger">Không thể tải thông tin chuyến xe</p>';
+            }
+        })
+        .catch(error => {
+            content.innerHTML = '<p class="text-danger">Có lỗi xảy ra khi tải thông tin</p>';
+        });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,323 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}{{ 'Thêm Mới' if not item else 'Chỉnh Sửa' }} {{ schema.label }} - Admin Panel{% endblock %}
+
+{% block page_title %}{{ 'Thêm Mới' if not item else 'Chỉnh Sửa' }} {{ schema.label }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('admin.list_items', collection_name=collection_name) }}">{{ schema.label }}</a></li>
+<li class="breadcrumb-item active">{{ 'Thêm Mới' if not item else 'Chỉnh Sửa' }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="bi bi-{{ 'plus-circle text-success' if not item else 'pencil-square text-warning' }} me-2"></i>
+                    {{ 'Thêm Mới' if not item else 'Chỉnh Sửa' }} {{ schema.label }}
+                </h5>
+                <div class="card-actions">
+                    <a href="{{ url_for('admin.list_items', collection_name=collection_name) }}" 
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-arrow-left me-1"></i>Quay Lại
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="crudForm">
+                    <div class="row">
+                        {% for field in schema.fields %}
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ field }}" class="form-label">
+                                <i class="bi bi-{{ 'shield-check' if field == 'role' else 'key' if 'ma' in field.lower() else 'type' if 'ten' in field.lower() else 'geo-alt' if 'diem' in field.lower() or 'dia' in field.lower() else 'clock' if 'gio' in field.lower() or 'thoi' in field.lower() else 'calendar3' if 'ngay' in field.lower() else 'info-circle' if 'tinh' in field.lower() or 'trang' in field.lower() else 'chat-left-text' if 'mo' in field.lower() or 'noi' in field.lower() else 'tag' }} text-primary me-1"></i>
+                                {% if field == 'role' %}Vai Trò
+                                {% else %}{{ field | title | replace('ma', 'Mã ') | replace('ten', 'Tên ') | replace('diem', 'Điểm ') | replace('gio', 'Giờ ') | replace('ngay', 'Ngày ') | replace('tinh', 'Tình ') | replace('trang', 'Trạng ') }}
+                                {% endif %}
+                            </label>
+                            
+                            {% if field == 'role' and collection_name == 'TaiKhoan' %}
+                                <select class="form-select" name="{{ field }}" id="{{ field }}" required>
+                                    <option value="">Chọn vai trò...</option>
+                                    {% for role_option in schema.get('role_options', ['ADMIN', 'QLVH', 'QLKT', 'QLNS', 'CSKH']) %}
+                                    <option value="{{ role_option }}" {{ 'selected' if item and item.get(field) == role_option else '' }}>
+                                        {% if role_option == 'ADMIN' %}Quản trị viên
+                                        {% elif role_option == 'QLVH' %}Quản lý vận hành
+                                        {% elif role_option == 'QLKT' %}Quản lý kế toán
+                                        {% elif role_option == 'QLNS' %}Quản lý nhân sự
+                                        {% elif role_option == 'CSKH' %}Chăm sóc khách hàng
+                                        {% else %}{{ role_option }}
+                                        {% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                                
+                            {% elif field == 'tinhTrang' %}
+                                <select class="form-select" name="{{ field }}" id="{{ field }}" required>
+                                    <option value="">Chọn trạng thái...</option>
+                                    <option value="Hoạt động" {{ 'selected' if item and item.get(field) == 'Hoạt động' else '' }}>Hoạt động</option>
+                                    <option value="Không hoạt động" {{ 'selected' if item and item.get(field) == 'Không hoạt động' else '' }}>Không hoạt động</option>
+                                    {% if collection_name == 'TinTuc' %}
+                                    <option value="Draft" {{ 'selected' if item and item.get(field) == 'Draft' else '' }}>Bản nháp</option>
+                                    {% endif %}
+                                </select>
+                                
+                            {% elif 'ngay' in field.lower() %}
+                                <input type="date" class="form-control" name="{{ field }}" id="{{ field }}" 
+                                       value="{{ item[field].strftime('%Y-%m-%d') if item and field in item and item[field] else '' }}">
+                                       
+                            {% elif 'gio' in field.lower() %}
+                                <input type="time" class="form-control" name="{{ field }}" id="{{ field }}" 
+                                       value="{{ item[field] if item and field in item else '' }}">
+                                       
+                            {% elif 'gia' in field.lower() or 'tien' in field.lower() %}
+                                <div class="input-group">
+                                    <span class="input-group-text">₫</span>
+                                    <input type="number" class="form-control" name="{{ field }}" id="{{ field }}" 
+                                           value="{{ item[field] if item and field in item else '' }}" min="0" step="1000">
+                                </div>
+                                
+                            {% elif 'so' in field.lower() and ('luong' in field.lower() or 'cho' in field.lower()) %}
+                                <input type="number" class="form-control" name="{{ field }}" id="{{ field }}" 
+                                       value="{{ item[field] if item and field in item else '' }}" min="1" max="100">
+                                       
+                            {% elif 'mo' in field.lower() or 'noi' in field.lower() %}
+                                <textarea class="form-control" name="{{ field }}" id="{{ field }}" rows="3" 
+                                         placeholder="Nhập {{ field.lower() }}...">{{ item[field] if item and field in item else '' }}</textarea>
+                                         
+                            {% elif 'email' in field.lower() %}
+                                <input type="email" class="form-control" name="{{ field }}" id="{{ field }}" 
+                                       value="{{ item[field] if item and field in item else '' }}" 
+                                       placeholder="example@email.com">
+                                       
+                            {% elif 'sdt' in field.lower() or 'phone' in field.lower() %}
+                                <input type="tel" class="form-control" name="{{ field }}" id="{{ field }}" 
+                                       value="{{ item[field] if item and field in item else '' }}" 
+                                       placeholder="0123456789" pattern="[0-9]{10,11}">
+                                       
+                            {% else %}
+                                <input type="text" class="form-control" name="{{ field }}" id="{{ field }}" 
+                                       value="{{ item.get(field, '') }}" 
+                                       placeholder="Nhập {{ field.lower() }}..." required>
+                            {% endif %}
+                            
+                            <!-- Add password fields for TaiKhoan and KhachHang -->
+                            {% if (collection_name == 'TaiKhoan' and field == 'role') or (collection_name == 'KhachHang' and field == 'matKhau') %}
+                            {% if collection_name == 'TaiKhoan' or (collection_name == 'KhachHang' and field == 'matKhau') %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="matKhau" class="form-label">
+                                <i class="bi bi-lock text-primary me-1"></i>
+                                {% if item %}Đổi Mật Khẩu{% else %}Mật Khẩu{% endif %}
+                            </label>
+                            <input type="password" class="form-control" name="matKhau" id="matKhau" 
+                                   value="{{ '' if item else '' }}"
+                                   placeholder="{% if item %}Nhập mật khẩu mới (để trống nếu không đổi)...{% else %}Nhập mật khẩu...{% endif %}" 
+                                   {% if not item %}required{% endif %}>
+                            <div class="form-text">
+                                {% if item %}
+                                    Để trống nếu không muốn thay đổi mật khẩu hiện tại
+                                {% else %}
+                                    {% if collection_name == 'TaiKhoan' %}Mật khẩu đăng nhập cho tài khoản này
+                                    {% else %}Mật khẩu đăng nhập cho khách hàng{% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% if item %}
+                        <div class="col-md-6 mb-3">
+                            <label for="confirmPassword" class="form-label">
+                                <i class="bi bi-shield-check text-primary me-1"></i>
+                                Xác Nhận Mật Khẩu
+                            </label>
+                            <input type="password" class="form-control" name="confirmPassword" id="confirmPassword" 
+                                   placeholder="Nhập lại mật khẩu mới...">
+                            <div class="form-text">
+                                Nhập lại mật khẩu để xác nhận
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endif %}
+                            {% endif %}
+                            
+                            <div class="form-text">
+                                {% if field == 'role' %}
+                                    Chọn vai trò và quyền hạn cho tài khoản này
+                                {% elif field == 'tinhTrang' %}
+                                    Chọn trạng thái hoạt động của {{ schema.label.lower() }}
+                                {% elif 'ma' in field.lower() %}
+                                    Mã định danh duy nhất (bắt buộc)
+                                {% elif 'ten' in field.lower() %}
+                                    Tên hiển thị của {{ schema.label.lower() }}
+                                {% else %}
+                                    Thông tin {{ field.lower() }} của {{ schema.label.lower() }}
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <button type="button" class="btn btn-outline-secondary me-2" onclick="resetForm()">
+                                        <i class="bi bi-arrow-clockwise me-1"></i>Đặt lại
+                                    </button>
+                                    <a href="{{ url_for('admin.list_items', collection_name=collection_name) }}" 
+                                       class="btn btn-outline-danger">
+                                        <i class="bi bi-x-lg me-1"></i>Hủy
+                                    </a>
+                                </div>
+                                <div>
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-{{ 'plus-lg' if not item else 'check-lg' }} me-1"></i>
+                                        {{ 'Thêm Mới' if not item else 'Cập Nhật' }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Quick Help Card -->
+        <div class="dashboard-card mt-4">
+            <div class="card-header">
+                <h6 class="card-title">
+                    <i class="bi bi-question-circle text-info me-2"></i>
+                    Hướng dẫn nhanh
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-info-circle text-primary me-1"></i>Lưu ý:</h6>
+                        <ul class="list-unstyled small">
+                            <li>• Các trường có dấu * là bắt buộc</li>
+                            <li>• Mã định danh phải là duy nhất</li>
+                            <li>• Kiểm tra kỹ thông tin trước khi lưu</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="bi bi-keyboard text-success me-1"></i>Phím tắt:</h6>
+                        <ul class="list-unstyled small">
+                            <li>• Ctrl + S: Lưu form</li>
+                            <li>• Esc: Hủy và quay lại</li>
+                            <li>• F5: Làm mới trang</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Form validation and enhancement
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('crudForm');
+    
+    // Form submission with loading state
+    form.addEventListener('submit', function(e) {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        
+        submitBtn.innerHTML = '<i class="bi bi-arrow-repeat spin me-1"></i>Đang xử lý...';
+        submitBtn.disabled = true;
+        
+        // Re-enable button after 3 seconds if form doesn't submit
+        setTimeout(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 3000);
+    });
+    
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            form.submit();
+        }
+        if (e.key === 'Escape') {
+            window.location.href = "{{ url_for('admin.list_items', collection_name=collection_name) }}";
+        }
+    });
+});
+
+// Reset form function
+function resetForm() {
+    if (confirm('Bạn có chắc chắn muốn đặt lại form? Mọi thay đổi sẽ bị mất.')) {
+        document.getElementById('crudForm').reset();
+    }
+}
+
+// Password validation for TaiKhoan
+{% if collection_name == 'TaiKhoan' %}
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordField = document.getElementById('matKhau');
+    const confirmField = document.getElementById('confirmPassword');
+    
+    if (passwordField && confirmField) {
+        function validatePassword() {
+            const password = passwordField.value;
+            const confirm = confirmField.value;
+            
+            // Remove existing validation classes
+            confirmField.classList.remove('is-valid', 'is-invalid');
+            
+            if (confirm === '') {
+                return; // Don't validate if empty
+            }
+            
+            if (password === confirm) {
+                confirmField.classList.add('is-valid');
+                confirmField.nextElementSibling.textContent = 'Mật khẩu khớp!';
+                confirmField.nextElementSibling.classList.remove('text-danger');
+                confirmField.nextElementSibling.classList.add('text-success');
+            } else {
+                confirmField.classList.add('is-invalid');
+                confirmField.nextElementSibling.textContent = 'Mật khẩu không khớp!';
+                confirmField.nextElementSibling.classList.remove('text-success');
+                confirmField.nextElementSibling.classList.add('text-danger');
+            }
+        }
+        
+        passwordField.addEventListener('input', validatePassword);
+        confirmField.addEventListener('input', validatePassword);
+        
+        // Prevent form submission if passwords don't match
+        document.getElementById('crudForm').addEventListener('submit', function(e) {
+            const password = passwordField.value;
+            const confirm = confirmField.value;
+            
+            if (password && confirm && password !== confirm) {
+                e.preventDefault();
+                confirmField.focus();
+                alert('Vui lòng đảm bảo mật khẩu xác nhận khớp với mật khẩu mới!');
+            }
+        });
+    }
+});
+{% endif %}
+
+// Add spinning animation for loading states
+const style = document.createElement('style');
+style.textContent = `
+    .spin {
+        animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

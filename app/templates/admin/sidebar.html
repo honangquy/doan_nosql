@@ -1,0 +1,170 @@
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <a href="{{ url_for('admin.dashboard') }}" class="sidebar-brand">
+            <div class="brand-logo">
+                <i class="bi bi-speedometer2"></i>
+            </div>
+            <div class="brand-text">
+                <h5 class="brand-title">XeKhach</h5>
+                <small class="brand-subtitle">Admin Panel</small>
+            </div>
+        </a>
+        <button class="sidebar-toggle d-lg-none" onclick="toggleSidebar()">
+            <i class="bi bi-x-lg"></i>
+        </button>
+    </div>
+    
+    <div class="sidebar-content">
+        <nav class="sidebar-nav">
+            <!-- Dashboard -->
+            <div class="nav-section">
+                <a href="{{ url_for('admin.dashboard') }}" class="nav-link {{ 'active' if request.endpoint == 'admin.dashboard' }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-grid"></i>
+                    </div>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </div>
+            
+            <!-- Management Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">Quản Lý Vận Chuyển</div>
+                
+                <a href="{{ url_for('admin.list_items', collection_name='TuyenDuong') }}" class="nav-link {{ 'active' if 'TuyenDuong' in request.endpoint }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-signpost-2"></i>
+                    </div>
+                    <span class="nav-text">Tuyến Đường</span>
+                    <span class="nav-badge">{{ tuyen_count or 0 }}</span>
+                </a>
+                
+                <a href="{{ url_for('admin.list_items', collection_name='LichTrinh') }}" class="nav-link {{ 'active' if 'LichTrinh' in request.endpoint }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-calendar3"></i>
+                    </div>
+                    <span class="nav-text">Lịch Trình</span>
+                    <span class="nav-badge">{{ lich_count or 0 }}</span>
+                </a>
+                
+                <a href="{{ url_for('admin.list_items', collection_name='XeKhach') }}" class="nav-link {{ 'active' if 'XeKhach' in request.endpoint }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-bus-front"></i>
+                    </div>
+                    <span class="nav-text">Xe Khách</span>
+                    <span class="nav-badge">{{ xe_count or 0 }}</span>
+                </a>
+                
+                <a href="{{ url_for('admin.seat_map') }}" class="nav-link {{ 'active' if 'seat_map' in request.endpoint }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-grid-3x3-gap"></i>
+                    </div>
+                    <span class="nav-text">Sơ Đồ Ghế</span>
+                </a>
+                
+                <a href="{{ url_for('admin.list_items', collection_name='GiaVe') }}" class="nav-link {{ 'active' if 'GiaVe' in request.endpoint }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-currency-dollar"></i>
+                    </div>
+                    <span class="nav-text">Giá Vé</span>
+                    <span class="nav-badge badge-warning">{{ gia_count or 0 }}</span>
+                </a>
+                
+                <a href="{{ url_for('admin.trip_list') }}" class="nav-link {{ 'active' if 'trip_list' in request.endpoint or 'create_trip' in request.endpoint }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-calendar-event"></i>
+                    </div>
+                    <span class="nav-text">Chuyến Xe</span>
+                    <span class="nav-badge badge-info">{{ trip_count or 0 }}</span>
+                </a>
+            </div>
+            
+            <!-- Customer Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">Quản Lý Khách Hàng</div>
+                
+                <a href="{{ url_for('admin.list_items', collection_name='VeXe') }}" class="nav-link {{ 'active' if 'VeXe' in request.endpoint }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-ticket-perforated"></i>
+                    </div>
+                    <span class="nav-text">Vé Xe</span>
+                    <span class="nav-badge badge-success">{{ ve_count or 0 }}</span>
+                </a>
+                
+                <a href="{{ url_for('admin.list_items', collection_name='KhachHang') }}" class="nav-link {{ 'active' if 'KhachHang' in request.endpoint }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <span class="nav-text">Khách Hàng</span>
+                    <span class="nav-badge">{{ khach_count or 0 }}</span>
+                </a>
+                
+                <a href="{{ url_for('admin.list_items', collection_name='TaiKhoan') }}" class="nav-link {{ 'active' if 'TaiKhoan' in request.endpoint }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-person-gear"></i>
+                    </div>
+                    <span class="nav-text">Tài Khoản</span>
+                </a>
+            </div>
+            
+            <!-- Content Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">Nội Dung</div>
+                
+                <a href="{{ url_for('admin.list_items', collection_name='TinTuc') }}" class="nav-link {{ 'active' if 'TinTuc' in request.endpoint }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-newspaper"></i>
+                    </div>
+                    <span class="nav-text">Tin Tức</span>
+                    <span class="nav-badge">{{ tin_count or 0 }}</span>
+                </a>
+                
+                <a href="{{ url_for('admin.list_items', collection_name='DiaDiem') }}" class="nav-link {{ 'active' if 'DiaDiem' in request.endpoint }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-geo-alt"></i>
+                    </div>
+                    <span class="nav-text">Địa Điểm</span>
+                </a>
+            </div>
+            
+            <!-- Reports Section -->
+            <div class="nav-section">
+                <div class="nav-section-title">Báo Cáo</div>
+                
+                <a href="{{ url_for('admin.revenue_report') }}" class="nav-link {{ 'active' if 'revenue' in request.endpoint }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-graph-up"></i>
+                    </div>
+                    <span class="nav-text">Doanh Thu</span>
+                </a>
+                
+                <a href="{{ url_for('admin.statistics') }}" class="nav-link {{ 'active' if 'statistics' in request.endpoint }}">
+                    <div class="nav-icon">
+                        <i class="bi bi-bar-chart"></i>
+                    </div>
+                    <span class="nav-text">Thống Kê</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+    
+    <div class="sidebar-footer">
+        <div class="user-card">
+            <div class="user-avatar">
+                <img src="https://ui-avatars.com/api/?name={{ session.get('username', 'Admin') }}&background=4B7BEC&color=fff&size=40" alt="Avatar">
+            </div>
+            <div class="user-info">
+                <div class="user-name">{{ session.get('username', 'Admin') }}</div>
+                <div class="user-role">Administrator</div>
+            </div>
+            <div class="user-actions">
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm" title="Đăng xuất">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mobile Sidebar Backdrop -->
+<div class="sidebar-backdrop d-lg-none" id="sidebarBackdrop" onclick="closeSidebar()"></div>

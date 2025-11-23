@@ -1,0 +1,423 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-content fade-in-up">
+                    <h1 class="hero-title">
+                        Đặt vé xe khách<br>
+                        <span class="text-accent-yellow">dễ dàng — nhanh chóng — tiện lợi</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Hệ thống đặt vé xe khách online hàng đầu Việt Nam. 
+                        Tìm kiếm và đặt vé chỉ trong vài phút với giá tốt nhất.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image text-center">
+                    <img src="https://via.placeholder.com/500x300/003B95/FFFFFF?text=XE+KHÁCH" 
+                         alt="Xe Khách" class="img-fluid">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Search Box -->
+        <div class="search-container">
+            <div class="search-box">
+                <form action="{{ url_for('user.search') }}" method="GET">
+                    <div class="row g-3">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="search-input-group">
+                                <label for="diem_di">
+                                    <i class="bi bi-geo-alt"></i> Điểm đi
+                                </label>
+                                <select class="form-select" name="diem_di" id="diem_di">
+                                    <option value="">Chọn điểm đi...</option>
+                                    <option value="MĐM">TP. Hồ Chí Minh (Miền Đông)</option>
+                                    <option value="VPQ1">TP. Hồ Chí Minh (Quận 1)</option>
+                                    <option value="VPBinhTan">TP. Hồ Chí Minh (Bình Tân)</option>
+                                    <option value="BXCT">Cần Thơ</option>
+                                    <option value="VPDL">Đà Lạt</option>
+                                    <option value="BXVT">Vũng Tàu</option>
+                                    <option value="VPAG">An Giang</option>
+                                    <option value="BXCM">Cà Mau</option>
+                                    <option value="VPKH">Nha Trang</option>
+                                    <option value="VPTN">Tây Ninh</option>
+                                    <option value="VPVL">Vĩnh Long</option>
+                                    <option value="VPTD">Đồng Tháp</option>
+                                    <option value="VPQN">Quy Nhơn</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-3 col-md-6">
+                            <div class="search-input-group">
+                                <label for="diem_den">
+                                    <i class="bi bi-geo-alt-fill"></i> Điểm đến
+                                </label>
+                                <select class="form-select" name="diem_den" id="diem_den">
+                                    <option value="">Chọn điểm đến...</option>
+                                    <option value="MĐM">TP. Hồ Chí Minh (Miền Đông)</option>
+                                    <option value="VPQ1">TP. Hồ Chí Minh (Quận 1)</option>
+                                    <option value="VPBinhTan">TP. Hồ Chí Minh (Bình Tân)</option>
+                                    <option value="BXCT">Cần Thơ</option>
+                                    <option value="VPDL">Đà Lạt</option>
+                                    <option value="BXVT">Vũng Tàu</option>
+                                    <option value="VPAG">An Giang</option>
+                                    <option value="BXCM">Cà Mau</option>
+                                    <option value="VPKH">Nha Trang</option>
+                                    <option value="VPTN">Tây Ninh</option>
+                                    <option value="VPVL">Vĩnh Long</option>
+                                    <option value="VPTD">Đồng Tháp</option>
+                                    <option value="VPQN">Quy Nhơn</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-2 col-md-6">
+                            <div class="search-input-group">
+                                <label for="ngay_di">
+                                    <i class="bi bi-calendar"></i> Ngày đi
+                                </label>
+                                <input type="text" class="form-control" name="ngay_di" id="ngay_di" 
+                                       placeholder="Chọn ngày..." readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-2 col-md-6">
+                            <div class="search-input-group">
+                                <label for="so_khach">
+                                    <i class="bi bi-people"></i> Số khách
+                                </label>
+                                <select class="form-select" name="so_khach" id="so_khach">
+                                    <option value="1">1 người</option>
+                                    <option value="2">2 người</option>
+                                    <option value="3">3 người</option>
+                                    <option value="4">4 người</option>
+                                    <option value="5">5+ người</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-2 col-md-12">
+                            <div class="search-input-group">
+                                <label>&nbsp;</label>
+                                <button type="submit" class="search-btn">
+                                    <i class="bi bi-search"></i> Tìm chuyến
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <h2 class="section-title">Tại sao chọn XeKhach.com?</h2>
+        <div class="row">
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                    <h4 class="feature-title">Đặt vé 24/7</h4>
+                    <p class="feature-description">
+                        Hệ thống hoạt động 24/7, cho phép bạn đặt vé bất cứ lúc nào, 
+                        ở bất cứ đâu chỉ với vài thao tác đơn giản.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <h4 class="feature-title">An toàn & Tin cậy</h4>
+                    <p class="feature-description">
+                        Thông tin cá nhân và thanh toán được bảo mật tối đa. 
+                        Đối tác với các nhà xe uy tín trên toàn quốc.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-currency-exchange"></i>
+                    </div>
+                    <h4 class="feature-title">Giá tốt nhất</h4>
+                    <p class="feature-description">
+                        So sánh giá từ nhiều nhà xe khác nhau, đảm bảo bạn 
+                        luôn có được mức giá tốt nhất cho chuyến đi.
+                    </p>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-headset"></i>
+                    </div>
+                    <h4 class="feature-title">Hỗ trợ 24/7</h4>
+                    <p class="feature-description">
+                        Đội ngũ chăm sóc khách hàng chuyên nghiệp, sẵn sàng 
+                        hỗ trợ bạn mọi lúc qua hotline và chat online.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Popular Routes Section -->
+<section class="routes-section">
+    <div class="container">
+        <h2 class="section-title">Tuyến đường phổ biến</h2>
+        <div class="row">
+            {% for td in tuyen_duong[:8] %}
+            <div class="col-lg-3 col-md-6 mb-4">
+                <div class="route-card">
+                    <div class="route-image">
+                        <i class="bi bi-bus-front"></i>
+                    </div>
+                    <div class="route-content">
+                        <h5 class="route-title">{{ td.tenTuyenDuong }}</h5>
+                        <div class="route-info">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span><i class="bi bi-geo-alt"></i> {{ td.diemDau }}</span>
+                                <span><i class="bi bi-arrow-right"></i></span>
+                                <span><i class="bi bi-geo-alt-fill"></i> {{ td.diemCuoi }}</span>
+                            </div>
+                            <div class="text-muted">
+                                <i class="bi bi-clock"></i> {{ td.thoiGianDi }} giờ
+                                <span class="ms-3">
+                                    <i class="bi bi-speedometer2"></i> {{ td.doDai }} km
+                                </span>
+                            </div>
+                        </div>
+                        <div class="route-price">
+                            Từ 250.000đ
+                        </div>
+                        <a href="{{ url_for('user.search', tuyen_duong=td._id) }}" 
+                           class="btn btn-primary w-100">
+                            <i class="bi bi-ticket"></i> Xem lịch trình
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- News Section -->
+{% if tin_tuc %}
+<section class="features-section">
+    <div class="container">
+        <div class="row align-items-center mb-4">
+            <div class="col">
+                <h2 class="section-title mb-0">Tin tức mới nhất</h2>
+            </div>
+            <div class="col-auto">
+                <a href="{{ url_for('user.news') }}" class="btn btn-outline-primary">
+                    Xem tất cả <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="row">
+            {% for tin in tin_tuc[:3] %}
+            <div class="col-md-4 mb-4">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="bi bi-newspaper"></i>
+                    </div>
+                    <h5 class="feature-title">{{ tin.tieuDe[:50] }}...</h5>
+                    <p class="feature-description">
+                        {{ tin.noiDung[:100] }}...
+                    </p>
+                    <a href="{{ url_for('user.news_detail', news_id=tin._id) }}" 
+                       class="btn btn-outline-primary btn-sm">
+                        Đọc thêm <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<!-- Flatpickr CSS & JS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
+
+<script>
+let availableDates = [];
+let flatpickrInstance = null;
+
+// Initialize Flatpickr
+function initDatePicker() {
+    flatpickrInstance = flatpickr("#ngay_di", {
+        locale: "vn",
+        minDate: "today",
+        dateFormat: "Y-m-d",
+        placeholder: "Chọn ngày đi...",
+        enable: [], // Will be populated with available dates
+        onChange: function(selectedDates, dateStr, instance) {
+            updatePriceDisplay(dateStr);
+        },
+        onDayCreate: function(dObj, dStr, fp, dayElem) {
+            // Add price info to available dates
+            const dateStr = dayElem.dateObj.toISOString().split('T')[0];
+            const dateInfo = availableDates.find(d => d.date === dateStr);
+            
+            if (dateInfo && dateInfo.price > 0) {
+                dayElem.innerHTML += `<small class="flatpickr-price">${formatPrice(dateInfo.price)}</small>`;
+                dayElem.classList.add('has-price');
+            }
+        }
+    });
+}
+
+// Load available dates when route selection changes
+function loadAvailableDates() {
+    const diemDi = document.getElementById('diem_di').value;
+    const diemDen = document.getElementById('diem_den').value;
+    
+    if (!diemDi || !diemDen) {
+        availableDates = [];
+        if (flatpickrInstance) {
+            flatpickrInstance.set('enable', []);
+        }
+        return;
+    }
+    
+    console.log('🔍 Loading available dates for:', diemDi, '→', diemDen);
+    
+    fetch(`/api/available-dates?diem_di=${diemDi}&diem_den=${diemDen}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('📅 Available dates:', data);
+            
+            if (data.dates && data.dates.length > 0) {
+                availableDates = data.dates;
+                const enabledDates = data.dates.map(d => d.date);
+                
+                if (flatpickrInstance) {
+                    flatpickrInstance.set('enable', enabledDates);
+                    flatpickrInstance.redraw();
+                }
+                
+                showRouteInfo(data.route, data.base_price, data.dates.length);
+            } else {
+                availableDates = [];
+                if (flatpickrInstance) {
+                    flatpickrInstance.set('enable', []);
+                }
+                showRouteInfo(null, 0, 0);
+            }
+        })
+        .catch(error => {
+            console.error('❌ Error loading dates:', error);
+            availableDates = [];
+        });
+}
+
+// Format price display
+function formatPrice(price) {
+    if (price === 0) return '';
+    return (price / 1000) + 'K';
+}
+
+// Update price display when date selected
+function updatePriceDisplay(selectedDate) {
+    const dateInfo = availableDates.find(d => d.date === selectedDate);
+    if (dateInfo) {
+        console.log('💰 Selected date price:', dateInfo.price, 'VND');
+        // You can update UI here to show selected date price
+    }
+}
+
+// Show route information
+function showRouteInfo(routeName, basePrice, tripCount) {
+    // Remove existing route info
+    const existingInfo = document.querySelector('.route-info-display');
+    if (existingInfo) {
+        existingInfo.remove();
+    }
+    
+    if (routeName && tripCount > 0) {
+        const searchContainer = document.querySelector('.search-container');
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'route-info-display mt-3';
+        infoDiv.innerHTML = `
+            <div class="alert alert-info">
+                <h6 class="mb-1"><i class="bi bi-info-circle"></i> ${routeName}</h6>
+                <small>Tìm thấy ${tripCount} chuyến xe - Giá từ ${basePrice.toLocaleString()} VNĐ</small>
+            </div>
+        `;
+        searchContainer.appendChild(infoDiv);
+    }
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    initDatePicker();
+    
+    // Listen for route selection changes
+    document.getElementById('diem_di').addEventListener('change', loadAvailableDates);
+    document.getElementById('diem_den').addEventListener('change', loadAvailableDates);
+    
+    // Auto-hide alerts
+    setTimeout(function() {
+        let alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            let bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+});
+</script>
+
+<style>
+.flatpickr-price {
+    display: block;
+    font-size: 9px;
+    color: #e74c3c;
+    font-weight: bold;
+    line-height: 1;
+    margin-top: 1px;
+}
+
+.flatpickr-day.has-price {
+    background: linear-gradient(135deg, #fff 60%, #e74c3c 60%);
+}
+
+.flatpickr-day.has-price:hover {
+    background: linear-gradient(135deg, #f8f9fa 60%, #c0392b 60%);
+}
+
+.route-info-display .alert {
+    margin-bottom: 0;
+    padding: 0.75rem 1rem;
+}
+
+.route-info-display .alert h6 {
+    color: #0c5460;
+    margin: 0;
+}
+</style>
+{% endblock %}

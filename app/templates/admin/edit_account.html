@@ -1,0 +1,254 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Chỉnh sửa tài khoản{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.accounts') }}">Quản lý tài khoản</a></li>
+            <li class="breadcrumb-item active">Chỉnh sửa: {{ account.ten }}</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-edit me-2"></i>Chỉnh sửa tài khoản: {{ account.ten }}
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" id="editAccountForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label">Tên đăng nhập</label>
+                                <input type="text" class="form-control" id="username" value="{{ account.ten }}" disabled>
+                                <div class="form-text">Tên đăng nhập không thể thay đổi</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">Mật khẩu mới</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Để trống nếu không đổi">
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="form-text">Để trống nếu không muốn thay đổi mật khẩu</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="full_name" class="form-label">Họ tên</label>
+                                <input type="text" class="form-control" id="full_name" name="full_name" value="{{ account.hoTen or account.ten }}">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" value="{{ account.email or '' }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="role" class="form-label">Role/Phân quyền <span class="text-danger">*</span></label>
+                                <select class="form-select" id="role" name="role" required>
+                                    {% for role in roles %}
+                                    <option value="{{ role }}" {% if role == (account.role or account.maLoai) %}selected{% endif %}>
+                                        {{ role }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label">Trạng thái</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="Hoạt động" {% if (account.trangThai or 'Hoạt động') == 'Hoạt động' %}selected{% endif %}>Hoạt động</option>
+                                    <option value="Không hoạt động" {% if account.trangThai == 'Không hoạt động' %}selected{% endif %}>Không hoạt động</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Current Role Info -->
+                        <div class="mb-4">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">Thông tin hiện tại:</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Role hiện tại:</small><br>
+                                            <span class="badge bg-{% if (account.role or account.maLoai) == 'ADMIN' %}danger{% elif (account.role or account.maLoai) == 'QLVH' %}primary{% elif (account.role or account.maLoai) == 'QLKT' %}success{% elif (account.role or account.maLoai) == 'QLNS' %}warning{% else %}info{% endif %} mb-2">
+                                                {{ account.role or account.maLoai }}
+                                            </span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <small class="text-muted">Ngày tạo:</small><br>
+                                            <span class="text-dark">
+                                                {% if account.ngayTao %}
+                                                    {{ account.ngayTao.strftime('%d/%m/%Y %H:%M') }}
+                                                {% elif account.ngayThem %}
+                                                    {{ account.ngayThem.strftime('%d/%m/%Y %H:%M') }}
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Role Permissions Preview -->
+                        <div class="mb-4" id="rolePermissions">
+                            <div class="card bg-info bg-opacity-10">
+                                <div class="card-body">
+                                    <h6 class="card-title text-info">Quyền hạn của role này:</h6>
+                                    <div id="permissionsList"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                {% if account.ten != 'admin' %}
+                                <button type="button" class="btn btn-danger" onclick="confirmDelete()">
+                                    <i class="fas fa-trash me-2"></i>Xóa tài khoản
+                                </button>
+                                {% endif %}
+                            </div>
+                            <div class="d-flex gap-2">
+                                <a href="{{ url_for('admin.accounts') }}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>Hủy
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Cập nhật
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Xác nhận xóa
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa tài khoản <strong>{{ account.ten }}</strong> không?</p>
+                <p class="text-danger"><i class="fas fa-warning me-1"></i>Hành động này không thể hoàn tác!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form method="POST" action="{{ url_for('admin.delete_account', account_id=account._id) }}" class="d-inline">
+                    <button type="submit" class="btn btn-danger">Xác nhận xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle password visibility
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const icon = this.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+});
+
+// Role permissions mapping
+const rolePermissions = {
+    'ADMIN': ['Toàn quyền hệ thống'],
+    'QLVH': ['dashboard', 'tuyen_duong', 'lich_trinh', 'xe_khach', 'khach_hang', 've_xe', 'gia_ve', 'nhan_vien', 'tin_tuc', 'tai_khoan', 'doanh_thu', 'thong_ke', 'create', 'read', 'update', 'delete'],
+    'QLKT': ['dashboard', 'gia_ve', 'doanh_thu', 'thong_ke', 've_xe', 'read', 'create', 'update'],
+    'QLNS': ['dashboard', 'nhan_vien', 'tai_khoan', 'thong_ke', 'read', 'create', 'update', 'delete'],
+    'CSKH': ['dashboard', 'khach_hang', 've_xe', 'lich_trinh', 'thong_ke', 'read', 'create', 'update']
+};
+
+// Show permissions for current and selected role
+function updatePermissions(selectedRole) {
+    const permissionsList = document.getElementById('permissionsList');
+    
+    if (selectedRole && rolePermissions[selectedRole]) {
+        const permissions = rolePermissions[selectedRole];
+        permissionsList.innerHTML = permissions.map(p => 
+            `<span class="badge bg-info me-1 mb-1">${p}</span>`
+        ).join('');
+    }
+}
+
+// Initialize with current role
+document.addEventListener('DOMContentLoaded', function() {
+    const currentRole = document.getElementById('role').value;
+    updatePermissions(currentRole);
+});
+
+// Update when role changes
+document.getElementById('role').addEventListener('change', function() {
+    updatePermissions(this.value);
+});
+
+// Delete confirmation
+function confirmDelete() {
+    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    modal.show();
+}
+
+// Form validation
+document.getElementById('editAccountForm').addEventListener('submit', function(e) {
+    const role = document.getElementById('role').value;
+    
+    if (!role) {
+        e.preventDefault();
+        alert('Vui lòng chọn role');
+        return false;
+    }
+});
+</script>
+
+<style>
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.btn {
+    border-radius: 6px;
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+}
+
+.modal-content {
+    border-radius: 10px;
+}
+</style>
+{% endblock %}

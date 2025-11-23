@@ -1,0 +1,156 @@
+{% extends 'base_new.html' %}
+
+{% block title %}Đăng ký - XeKhach.com{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="logo">
+                <i class="bi bi-bus-front-fill"></i>
+                <span>XeKhach.com</span>
+            </div>
+            <h2 class="auth-title">Tạo tài khoản mới</h2>
+            <p class="auth-subtitle">Đăng ký để bắt đầu đặt vé xe khách</p>
+        </div>
+        
+        <form method="POST">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="ho_ten">
+                            <i class="bi bi-person-badge"></i> Họ và tên
+                        </label>
+                        <input type="text" 
+                               class="form-control" 
+                               id="ho_ten" 
+                               name="ho_ten" 
+                               placeholder="Nguyễn Văn A"
+                               required>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="sdt">
+                            <i class="bi bi-telephone"></i> Số điện thoại
+                        </label>
+                        <input type="tel" 
+                               class="form-control" 
+                               id="sdt" 
+                               name="sdt" 
+                               placeholder="0909123456"
+                               pattern="[0-9]{10,11}"
+                               title="Số điện thoại từ 10-11 chữ số"
+                               required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="email">
+                    <i class="bi bi-envelope"></i> Email
+                </label>
+                <input type="email" 
+                       class="form-control" 
+                       id="email" 
+                       name="email" 
+                       placeholder="example@email.com"
+                       required>
+            </div>
+            
+
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="password">
+                            <i class="bi bi-lock"></i> Mật khẩu
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="password" 
+                               name="password" 
+                               placeholder="Tối thiểu 6 ký tự"
+                               minlength="6"
+                               required>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="confirm_password">
+                            <i class="bi bi-lock-fill"></i> Xác nhận mật khẩu
+                        </label>
+                        <input type="password" 
+                               class="form-control" 
+                               id="confirm_password" 
+                               name="confirm_password" 
+                               placeholder="Nhập lại mật khẩu"
+                               required>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="agree_terms" required>
+                    <label class="form-check-label" for="agree_terms">
+                        Tôi đồng ý với <a href="#terms">Điều khoản sử dụng</a> 
+                        và <a href="#privacy">Chính sách bảo mật</a>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="newsletter">
+                    <label class="form-check-label" for="newsletter">
+                        Nhận thông tin khuyến mãi qua email
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-person-plus"></i> Tạo tài khoản
+            </button>
+        </form>
+        
+        <div class="auth-divider">
+            <span>hoặc đăng ký với</span>
+        </div>
+        
+        <div class="d-grid gap-2">
+            <button class="btn btn-outline-primary" type="button">
+                <i class="bi bi-google"></i> Google
+            </button>
+            <button class="btn btn-outline-primary" type="button">
+                <i class="bi bi-facebook"></i> Facebook
+            </button>
+        </div>
+        
+        <div class="auth-link">
+            <p>Đã có tài khoản? <a href="{{ url_for('auth.login') }}">Đăng nhập ngay</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Password confirmation validation
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+    
+    function validatePassword() {
+        if (password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Mật khẩu xác nhận không khớp');
+        } else {
+            confirmPassword.setCustomValidity('');
+        }
+    }
+    
+    password.addEventListener('change', validatePassword);
+    confirmPassword.addEventListener('keyup', validatePassword);
+</script>
+{% endblock %}

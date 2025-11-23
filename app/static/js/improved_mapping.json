@@ -1,0 +1,757 @@
+{
+  "route_vehicle_mapping": {
+    "HCM-CT": [
+      "X002",
+      "X014",
+      "X022",
+      "X025",
+      "X030",
+      "X043"
+    ],
+    "HCM-DL": [
+      "X007",
+      "X020",
+      "X028",
+      "X031",
+      "X044",
+      "X050"
+    ],
+    "HCM-VT": [
+      "X005",
+      "X027",
+      "X034",
+      "X042"
+    ],
+    "HCM-AG": [
+      "X009",
+      "X015",
+      "X021",
+      "X023",
+      "X032"
+    ],
+    "HCM-CM": [
+      "X003",
+      "X010",
+      "X033",
+      "X040"
+    ],
+    "HCM-KG": [
+      "X008",
+      "X011",
+      "X029",
+      "X041"
+    ],
+    "HCM-TNN": [
+      "X035",
+      "X049"
+    ],
+    "HCM-VL": [
+      "X012",
+      "X024",
+      "X037"
+    ],
+    "HCM-DT": [
+      "X026",
+      "X038"
+    ],
+    "HCM-GL": [
+      "X017",
+      "X048"
+    ],
+    "CM-CT": [
+      "X018",
+      "X045"
+    ],
+    "AG-CM": [
+      "X004",
+      "X039"
+    ],
+    "VL-HCM": [
+      "X012",
+      "X024",
+      "X037"
+    ],
+    "KG-HCM": [
+      "X008",
+      "X011",
+      "X029",
+      "X041"
+    ],
+    "TN-HCM": [
+      "X013"
+    ],
+    "HCM-ĐNai": [
+      "X006"
+    ],
+    "CT-HCM": [
+      "X002",
+      "X014",
+      "X022",
+      "X025",
+      "X030",
+      "X043"
+    ],
+    "DL-HCM": [
+      "X007",
+      "X020",
+      "X028",
+      "X031",
+      "X044",
+      "X050"
+    ],
+    "VT-HCM": [
+      "X005",
+      "X027",
+      "X034",
+      "X042"
+    ],
+    "AG-HCM": [
+      "X009",
+      "X015",
+      "X021",
+      "X023",
+      "X032"
+    ],
+    "CM-HCM": [
+      "X003",
+      "X010",
+      "X033",
+      "X040"
+    ],
+    "GL-HCM": [
+      "X017",
+      "X048"
+    ],
+    "HCM-HCM1": [
+      "X019",
+      "X036"
+    ],
+    "CT-CM": [
+      "X018",
+      "X045"
+    ],
+    "CM-AG": [
+      "X004",
+      "X039"
+    ],
+    "HCM-HN": [
+      "X046"
+    ],
+    "HCM-ĐNang": [
+      "X016",
+      "X047"
+    ],
+    "ĐNai-HCM": [
+      "X006"
+    ]
+  },
+  "detailed_mapping": {
+    "HCM-CT": [
+      {
+        "maXeKhach": "X002",
+        "ten": "Miền Tây 01",
+        "tuyen": "HCM-CT",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X014",
+        "ten": "Miền Tây 02",
+        "tuyen": "HCM-CT",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X022",
+        "ten": "Cần Thơ 01",
+        "tuyen": "HCM-CT",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X025",
+        "ten": "Cần Thơ 02 VIP",
+        "tuyen": "HCM-CT",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X030",
+        "ten": "Cần Thơ 03",
+        "tuyen": "HCM-CT",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X043",
+        "ten": "Miền Tây 03",
+        "tuyen": "HCM-CT",
+        "match_reason": "exact"
+      }
+    ],
+    "HCM-DL": [
+      {
+        "maXeKhach": "X007",
+        "ten": "Đà Lạt 02 VIP",
+        "tuyen": "HCM-DL",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X020",
+        "ten": "Đà Lạt 03 VIP",
+        "tuyen": "HCM-DL",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X028",
+        "ten": "Đà Lạt 04",
+        "tuyen": "HCM-DL",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X031",
+        "ten": "Đà Lạt 05",
+        "tuyen": "HCM-DL",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X044",
+        "ten": "Đà Lạt 06",
+        "tuyen": "HCM-DL",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X050",
+        "ten": "Đà Lạt 07 VIP",
+        "tuyen": "HCM-DL",
+        "match_reason": "exact"
+      }
+    ],
+    "HCM-VT": [
+      {
+        "maXeKhach": "X005",
+        "ten": "Vũng Tàu 01",
+        "tuyen": "HCM-VT",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X027",
+        "ten": "Vũng Tàu 02",
+        "tuyen": "HCM-VT",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X034",
+        "ten": "Vũng Tàu 03",
+        "tuyen": "HCM-VT",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X042",
+        "ten": "Vũng Tàu 04",
+        "tuyen": "HCM-VT",
+        "match_reason": "exact"
+      }
+    ],
+    "HCM-AG": [
+      {
+        "maXeKhach": "X009",
+        "ten": "An Giang 02",
+        "tuyen": "HCM-AG",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X015",
+        "ten": "An Giang 03",
+        "tuyen": "HCM-AG",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X021",
+        "ten": "An Giang 04",
+        "tuyen": "HCM-AG",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X023",
+        "ten": "An Giang 05",
+        "tuyen": "HCM-AG",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X032",
+        "ten": "An Giang 06",
+        "tuyen": "HCM-AG",
+        "match_reason": "exact"
+      }
+    ],
+    "HCM-CM": [
+      {
+        "maXeKhach": "X003",
+        "ten": "Cà Mau 01",
+        "tuyen": "HCM-CM",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X010",
+        "ten": "Cà Mau 02",
+        "tuyen": "HCM-CM",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X033",
+        "ten": "Cà Mau 04",
+        "tuyen": "HCM-CM",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X040",
+        "ten": "Cà Mau 05",
+        "tuyen": "HCM-CM",
+        "match_reason": "exact"
+      }
+    ],
+    "HCM-KG": [
+      {
+        "maXeKhach": "X008",
+        "ten": "Khánh Hòa 01",
+        "tuyen": "HCM-KG",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X011",
+        "ten": "Khánh Hòa 02",
+        "tuyen": "KG-HCM",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X029",
+        "ten": "Khánh Hòa 03",
+        "tuyen": "HCM-KG",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X041",
+        "ten": "Khánh Hòa 03",
+        "tuyen": "HCM-KG",
+        "match_reason": "exact"
+      }
+    ],
+    "HCM-TNN": [
+      {
+        "maXeKhach": "X035",
+        "ten": "Tây Ninh 02",
+        "tuyen": "HCM-TNN",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X049",
+        "ten": "Tây Ninh 03",
+        "tuyen": "HCM-TNN",
+        "match_reason": "exact"
+      }
+    ],
+    "HCM-VL": [
+      {
+        "maXeKhach": "X012",
+        "ten": "Vĩnh Long 01",
+        "tuyen": "VL-HCM",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X024",
+        "ten": "Vĩnh Long 02",
+        "tuyen": "HCM-VL",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X037",
+        "ten": "Vĩnh Long 03",
+        "tuyen": "VL-HCM",
+        "match_reason": "partial"
+      }
+    ],
+    "HCM-DT": [
+      {
+        "maXeKhach": "X026",
+        "ten": "Đồng Tháp 01",
+        "tuyen": "HCM-DT",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X038",
+        "ten": "Đồng Tháp 02",
+        "tuyen": "HCM-DT",
+        "match_reason": "exact"
+      }
+    ],
+    "HCM-GL": [
+      {
+        "maXeKhach": "X017",
+        "ten": "Gia Lai 01",
+        "tuyen": "HCM-GL",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X048",
+        "ten": "Gia Lai 02",
+        "tuyen": "HCM-GL",
+        "match_reason": "exact"
+      }
+    ],
+    "CM-CT": [
+      {
+        "maXeKhach": "X018",
+        "ten": "Cà Mau 03",
+        "tuyen": "CM-CT",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X045",
+        "ten": "Cà Mau - Cần Thơ 01",
+        "tuyen": "CM-CT",
+        "match_reason": "exact"
+      }
+    ],
+    "AG-CM": [
+      {
+        "maXeKhach": "X004",
+        "ten": "An Giang 01",
+        "tuyen": "AG-CM",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X039",
+        "ten": "An Giang - Cà Mau",
+        "tuyen": "AG-CM",
+        "match_reason": "exact"
+      }
+    ],
+    "VL-HCM": [
+      {
+        "maXeKhach": "X012",
+        "ten": "Vĩnh Long 01",
+        "tuyen": "VL-HCM",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X024",
+        "ten": "Vĩnh Long 02",
+        "tuyen": "HCM-VL",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X037",
+        "ten": "Vĩnh Long 03",
+        "tuyen": "VL-HCM",
+        "match_reason": "exact"
+      }
+    ],
+    "KG-HCM": [
+      {
+        "maXeKhach": "X008",
+        "ten": "Khánh Hòa 01",
+        "tuyen": "HCM-KG",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X011",
+        "ten": "Khánh Hòa 02",
+        "tuyen": "KG-HCM",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X029",
+        "ten": "Khánh Hòa 03",
+        "tuyen": "HCM-KG",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X041",
+        "ten": "Khánh Hòa 03",
+        "tuyen": "HCM-KG",
+        "match_reason": "partial"
+      }
+    ],
+    "TN-HCM": [
+      {
+        "maXeKhach": "X013",
+        "ten": "Tây Ninh 01",
+        "tuyen": "TN-HCM",
+        "match_reason": "exact"
+      }
+    ],
+    "HCM-ĐNai": [
+      {
+        "maXeKhach": "X006",
+        "ten": "Biên Hòa 01",
+        "tuyen": "HCM-ĐNai",
+        "match_reason": "exact"
+      }
+    ],
+    "CT-DL": [],
+    "CT-HCM": [
+      {
+        "maXeKhach": "X002",
+        "ten": "Miền Tây 01",
+        "tuyen": "HCM-CT",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X014",
+        "ten": "Miền Tây 02",
+        "tuyen": "HCM-CT",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X022",
+        "ten": "Cần Thơ 01",
+        "tuyen": "HCM-CT",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X025",
+        "ten": "Cần Thơ 02 VIP",
+        "tuyen": "HCM-CT",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X030",
+        "ten": "Cần Thơ 03",
+        "tuyen": "HCM-CT",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X043",
+        "ten": "Miền Tây 03",
+        "tuyen": "HCM-CT",
+        "match_reason": "partial"
+      }
+    ],
+    "DL-HCM": [
+      {
+        "maXeKhach": "X007",
+        "ten": "Đà Lạt 02 VIP",
+        "tuyen": "HCM-DL",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X020",
+        "ten": "Đà Lạt 03 VIP",
+        "tuyen": "HCM-DL",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X028",
+        "ten": "Đà Lạt 04",
+        "tuyen": "HCM-DL",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X031",
+        "ten": "Đà Lạt 05",
+        "tuyen": "HCM-DL",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X044",
+        "ten": "Đà Lạt 06",
+        "tuyen": "HCM-DL",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X050",
+        "ten": "Đà Lạt 07 VIP",
+        "tuyen": "HCM-DL",
+        "match_reason": "partial"
+      }
+    ],
+    "VT-HCM": [
+      {
+        "maXeKhach": "X005",
+        "ten": "Vũng Tàu 01",
+        "tuyen": "HCM-VT",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X027",
+        "ten": "Vũng Tàu 02",
+        "tuyen": "HCM-VT",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X034",
+        "ten": "Vũng Tàu 03",
+        "tuyen": "HCM-VT",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X042",
+        "ten": "Vũng Tàu 04",
+        "tuyen": "HCM-VT",
+        "match_reason": "partial"
+      }
+    ],
+    "AG-HCM": [
+      {
+        "maXeKhach": "X009",
+        "ten": "An Giang 02",
+        "tuyen": "HCM-AG",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X015",
+        "ten": "An Giang 03",
+        "tuyen": "HCM-AG",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X021",
+        "ten": "An Giang 04",
+        "tuyen": "HCM-AG",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X023",
+        "ten": "An Giang 05",
+        "tuyen": "HCM-AG",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X032",
+        "ten": "An Giang 06",
+        "tuyen": "HCM-AG",
+        "match_reason": "partial"
+      }
+    ],
+    "CM-HCM": [
+      {
+        "maXeKhach": "X003",
+        "ten": "Cà Mau 01",
+        "tuyen": "HCM-CM",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X010",
+        "ten": "Cà Mau 02",
+        "tuyen": "HCM-CM",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X033",
+        "ten": "Cà Mau 04",
+        "tuyen": "HCM-CM",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X040",
+        "ten": "Cà Mau 05",
+        "tuyen": "HCM-CM",
+        "match_reason": "partial"
+      }
+    ],
+    "GL-HCM": [
+      {
+        "maXeKhach": "X017",
+        "ten": "Gia Lai 01",
+        "tuyen": "HCM-GL",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X048",
+        "ten": "Gia Lai 02",
+        "tuyen": "HCM-GL",
+        "match_reason": "partial"
+      }
+    ],
+    "TQ-HCM": [],
+    "HCM-HCM1": [
+      {
+        "maXeKhach": "X019",
+        "ten": "Đón Tiễn Sân Bay",
+        "tuyen": "HCM-HCM1",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X036",
+        "ten": "Đón Tiễn 02",
+        "tuyen": "HCM-HCM1",
+        "match_reason": "exact"
+      }
+    ],
+    "HCM-HCM2": [],
+    "CT-CM": [
+      {
+        "maXeKhach": "X018",
+        "ten": "Cà Mau 03",
+        "tuyen": "CM-CT",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X045",
+        "ten": "Cà Mau - Cần Thơ 01",
+        "tuyen": "CM-CT",
+        "match_reason": "partial"
+      }
+    ],
+    "CT-AG": [],
+    "CT-VL": [],
+    "CT-DT": [],
+    "CT-KG": [],
+    "DL-KG": [],
+    "DL-CT": [],
+    "DL-GL": [],
+    "AG-VL": [],
+    "AG-DT": [],
+    "CM-AG": [
+      {
+        "maXeKhach": "X004",
+        "ten": "An Giang 01",
+        "tuyen": "AG-CM",
+        "match_reason": "partial"
+      },
+      {
+        "maXeKhach": "X039",
+        "ten": "An Giang - Cà Mau",
+        "tuyen": "AG-CM",
+        "match_reason": "partial"
+      }
+    ],
+    "TNN-AG": [],
+    "TNN-CT": [],
+    "TNN-VL": [],
+    "ĐNai-DL": [],
+    "ĐNai-KG": [],
+    "VL-DL": [],
+    "VT-CT": [],
+    "VT-DL": [],
+    "VT-TNN": [],
+    "GL-ĐNang": [],
+    "HCM-HN": [
+      {
+        "maXeKhach": "X046",
+        "ten": "Hà Nội 01",
+        "tuyen": "HCM-HN",
+        "match_reason": "exact"
+      }
+    ],
+    "HCM-ĐNang": [
+      {
+        "maXeKhach": "X016",
+        "ten": "Đà Nẵng 01",
+        "tuyen": "HCM-ĐNang",
+        "match_reason": "exact"
+      },
+      {
+        "maXeKhach": "X047",
+        "ten": "Đà Nẵng 02",
+        "tuyen": "HCM-ĐNang",
+        "match_reason": "exact"
+      }
+    ],
+    "ĐNai-HCM": [
+      {
+        "maXeKhach": "X006",
+        "ten": "Biên Hòa 01",
+        "tuyen": "HCM-ĐNai",
+        "match_reason": "partial"
+      }
+    ],
+    "BNXEMINNG-BNXEPHYN": []
+  }
+}

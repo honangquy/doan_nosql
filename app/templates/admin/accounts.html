@@ -1,0 +1,198 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Quản lý tài khoản{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Quản lý tài khoản
+                    </h2>
+                    <p class="text-muted mb-0">Quản lý người dùng và phân quyền hệ thống</p>
+                </div>
+                <div class="d-flex gap-2">
+                    {% if has_crud_permission('create') %}
+                    <a href="{{ url_for('admin.add_account') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Thêm tài khoản
+                    </a>
+                    <form method="POST" action="{{ url_for('admin.create_sample_users') }}" class="d-inline">
+                        <button type="submit" class="btn btn-outline-info" onclick="return confirm('Tạo tài khoản mẫu cho test?')">
+                            <i class="fas fa-database me-2"></i>Tạo tài khoản mẫu
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x mb-2"></i>
+                    <h4>{{ accounts|length }}</h4>
+                    <small>Tổng tài khoản</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-check fa-2x mb-2"></i>
+                    <h4>{{ accounts|selectattr('trangThai', 'equalto', 'Hoạt động')|list|length }}</h4>
+                    <small>Đang hoạt động</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-times fa-2x mb-2"></i>
+                    <h4>{{ accounts|selectattr('trangThai', 'equalto', 'Không hoạt động')|list|length }}</h4>
+                    <small>Không hoạt động</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-shield-alt fa-2x mb-2"></i>
+                    <h4>{{ accounts|selectattr('role', 'equalto', 'ADMIN')|list|length or accounts|selectattr('maLoai', 'equalto', 'ADMIN')|list|length }}</h4>
+                    <small>Quản trị viên</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accounts Table -->
+    <div class="card shadow">
+        <div class="card-header bg-white py-3">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h5 class="mb-0">Danh sách tài khoản</h5>
+                </div>
+                <div class="col-auto">
+                    <a href="{{ url_for('admin.permissions') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-key me-1"></i>Xem quyền hạn
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>STT</th>
+                            <th>Tên đăng nhập</th>
+                            <th>Họ tên</th>
+                            <th>Email</th>
+                            <th>Role/Loại</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày tạo</th>
+                            <th class="text-center">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for account in accounts %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-sm bg-primary text-white rounded-circle me-2">
+                                        {{ account.ten[0]|upper }}
+                                    </div>
+                                    <strong>{{ account.ten }}</strong>
+                                </div>
+                            </td>
+                            <td>{{ account.hoTen or account.ten }}</td>
+                            <td>{{ account.email or 'Chưa có email' }}</td>
+                            <td>
+                                <span class="badge bg-{% if account.role == 'ADMIN' or account.maLoai == 'ADMIN' %}danger{% elif account.role == 'QLVH' or account.maLoai == 'QLVH' %}primary{% elif account.role == 'QLKT' or account.maLoai == 'QLKT' %}success{% elif account.role == 'QLNS' or account.maLoai == 'QLNS' %}warning{% else %}info{% endif %}">
+                                    {{ account.role or account.maLoai }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if account.trangThai == 'Hoạt động' %}success{% else %}secondary{% endif %}">
+                                    {{ account.trangThai or 'Hoạt động' }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if account.ngayTao %}
+                                    {{ account.ngayTao.strftime('%d/%m/%Y') }}
+                                {% elif account.ngayThem %}
+                                    {{ account.ngayThem.strftime('%d/%m/%Y') }}
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group btn-group-sm">
+                                    {% if has_crud_permission('update') %}
+                                    <a href="{{ url_for('admin.edit_account', account_id=account._id) }}" class="btn btn-outline-primary btn-sm" title="Chỉnh sửa">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    {% endif %}
+                                    {% if has_crud_permission('delete') and account.ten != 'admin' %}
+                                    <form method="POST" action="{{ url_for('admin.delete_account', account_id=account._id) }}" class="d-inline">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Xóa" onclick="return confirm('Bạn có chắc muốn xóa tài khoản này?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="fas fa-users fa-2x mb-2 d-block"></i>
+                                Không có tài khoản nào
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.btn-group-sm .btn {
+    padding: 0.25rem 0.5rem;
+}
+
+.table th {
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.65rem;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,397 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Quản Lý Tuyến Xe - Quản lý xe khách{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="page-title">
+                    <i class="fas fa-route text-primary me-2"></i>
+                    Quản Lý Tuyến Xe
+                </h1>
+                <p class="page-subtitle">Quản lý thông tin các tuyến đường xe khách</p>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary btn-action" data-bs-toggle="modal" data-bs-target="#addRouteModal">
+                    <i class="fas fa-plus me-2"></i>
+                    Thêm tuyến xe
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-primary">
+                <div class="stats-card-body">
+                    <div class="stats-icon">
+                        <i class="fas fa-route"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3 class="stats-number" data-stat="total_routes">{{ routes|length }}</h3>
+                        <p class="stats-label">Tổng tuyến xe</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-success">
+                <div class="stats-card-body">
+                    <div class="stats-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3 class="stats-number" data-stat="active_routes">{{ active_routes or 0 }}</h3>
+                        <p class="stats-label">Đang hoạt động</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-card-body">
+                    <div class="stats-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3 class="stats-number" data-stat="avg_duration">{{ avg_duration or 0 }}h</h3>
+                        <p class="stats-label">Thời gian TB</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-info">
+                <div class="stats-card-body">
+                    <div class="stats-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3 class="stats-number" data-stat="avg_price">{{ avg_price or 0 }}k</h3>
+                        <p class="stats-label">Giá vé TB</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Routes Table Card -->
+    <div class="table-card">
+        <div class="table-card-header">
+            <h5 class="table-card-title">
+                <i class="fas fa-table me-2"></i>
+                Danh sách tuyến xe
+            </h5>
+            <div class="table-card-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control table-search" placeholder="Tìm kiếm tuyến xe...">
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-filter me-2"></i>
+                        Lọc
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="filterRoutes('all')">Tất cả</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterRoutes('active')">Hoạt động</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterRoutes('popular')">Phổ biến</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportRoutes()">Xuất Excel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th data-sortable="id">ID</th>
+                        <th data-sortable="departure_city">Điểm đi</th>
+                        <th data-sortable="arrival_city">Điểm đến</th>
+                        <th data-sortable="distance">Khoảng cách</th>
+                        <th data-sortable="duration">Thời gian</th>
+                        <th data-sortable="price">Giá vé</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for route in routes %}
+                    <tr data-id="{{ route._id }}">
+                        <td>
+                            <span class="badge bg-light text-dark">#{{ loop.index }}</span>
+                        </td>
+                        <td>
+                            <div class="route-info">
+                                <div class="route-location">
+                                    <i class="fas fa-map-marker-alt text-success me-1"></i>
+                                    <strong>{{ route.tenTuyenDuong.split(' - ')[0] if route.tenTuyenDuong and ' - ' in route.tenTuyenDuong else route.diemDau }}</strong>
+                                </div>
+                                <small class="text-muted">{{ route.diemDau or 'Bến xe trung tâm' }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="route-info">
+                                <div class="route-location">
+                                    <i class="fas fa-map-marker-alt text-danger me-1"></i>
+                                    <strong>{{ route.tenTuyenDuong.split(' - ')[1] if route.tenTuyenDuong and ' - ' in route.tenTuyenDuong else route.diemCuoi }}</strong>
+                                </div>
+                                <small class="text-muted">{{ route.diemCuoi or 'Bến xe trung tâm' }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ route.doDai or 0 }} km</span>
+                        </td>
+                        <td>
+                            <span class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ route.thoiGianDi or 0 }} giờ
+                            </span>
+                        </td>
+                        <td>
+                            <span class="price-tag">{{ '{:,.0f}'.format((route.doDai or 0) * 300) }} VNĐ</span>
+                        </td>
+                        <td>
+                            {% if route.tinhTrang == 'Hoạt động' %}
+                                <span class="badge bg-success">Hoạt động</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ route.tinhTrang or 'Dừng hoạt động' }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-outline-primary" data-action="view" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" data-action="edit" title="Chỉnh sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" data-action="schedule" title="Lịch trình">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" data-action="delete" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="table-pagination">
+            <div class="pagination-info">
+                Hiển thị {{ routes|length }} tuyến xe
+            </div>
+            <nav>
+                <ul class="pagination pagination-sm">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Trước</a>
+                    </li>
+                    <li class="page-item active">
+                        <a class="page-link" href="#">1</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">2</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Add Route Modal -->
+<div class="modal fade" id="addRouteModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-route me-2"></i>
+                    Thêm tuyến xe mới
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.admin_routes') }}">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- Route Information -->
+                        <div class="col-12">
+                            <h6 class="section-title">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Thông tin tuyến đường
+                            </h6>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="maTuyenDuong" class="form-label">Mã tuyến đường <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="maTuyenDuong" name="maTuyenDuong" 
+                                   placeholder="VD: HCM-HN" required maxlength="10" style="text-transform: uppercase;">
+                            <small class="text-muted">Mã duy nhất cho tuyến đường</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="tenTuyenDuong" class="form-label">Tên tuyến đường <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="tenTuyenDuong" name="tenTuyenDuong" 
+                                   placeholder="VD: TP.HCM - Hà Nội" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="diemDau" class="form-label">Điểm đầu <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="diemDau" name="diemDau" 
+                                   placeholder="VD: MĐM (Miền Đông Mới)" required>
+                            <small class="text-muted">Mã hoặc tên bến xe khởi hành</small>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="diemCuoi" class="form-label">Điểm cuối <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="diemCuoi" name="diemCuoi" 
+                                   placeholder="VD: MĐ (Mỹ Đình)" required>
+                            <small class="text-muted">Mã hoặc tên bến xe đích</small>
+                        </div>
+
+                        <!-- Distance & Time -->
+                        <div class="col-12">
+                            <h6 class="section-title mt-3">
+                                <i class="fas fa-route me-2"></i>
+                                Khoảng cách & Thời gian
+                            </h6>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="doDai" class="form-label">Độ dài (km) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="doDai" name="doDai" 
+                                   placeholder="VD: 169.0" min="1" step="0.1" required>
+                            <small class="text-muted">Khoảng cách thực tế của tuyến</small>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="thoiGianDi" class="form-label">Thời gian đi (giờ) <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="thoiGianDi" name="thoiGianDi" 
+                                   placeholder="VD: 4.5" min="0.5" step="0.5" required>
+                            <small class="text-muted">Thời gian di chuyển ước tính</small>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="tinhTrang" class="form-label">Tình trạng <span class="text-danger">*</span></label>
+                            <select class="form-select" id="tinhTrang" name="tinhTrang" required>
+                                <option value="Hoạt động">Hoạt động</option>
+                                <option value="Tạm dừng">Tạm dừng</option>
+                                <option value="Bảo trì">Bảo trì</option>
+                            </select>
+                        </div>
+
+                        <!-- Mô tả tuyến đường -->
+                        <div class="col-12">
+                            <h6 class="section-title mt-3">
+                                <i class="fas fa-info me-2"></i>
+                                Thông tin bổ sung
+                            </h6>
+                        </div>
+                        <div class="col-12">
+                            <label for="moTa" class="form-label">Mô tả</label>
+                            <textarea class="form-control" id="moTa" name="moTa" rows="4" 
+                                      placeholder="Mô tả về tuyến đường: đặc điểm địa lý, thời gian hoạt động, ghi chú đặc biệt..."></textarea>
+                            <small class="text-muted">Thông tin chi tiết về tuyến đường giúp quản lý tốt hơn</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Lưu tuyến xe
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Route management specific functions
+function filterRoutes(type) {
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const statusBadge = row.querySelector('.badge');
+        let show = true;
+        
+        if (type === 'active') {
+            show = statusBadge && statusBadge.textContent.includes('Hoạt động');
+        } else if (type === 'popular') {
+            // Mock popular filter - could be based on bookings
+            show = Math.random() > 0.5;
+        }
+        
+        row.style.display = show ? '' : 'none';
+    });
+    
+    DashStackAdmin.utils.showToast(`Đã lọc theo: ${type}`, 'info');
+}
+
+function exportRoutes() {
+    DashStackAdmin.utils.showToast('Tính năng xuất Excel đang được phát triển', 'info');
+}
+
+// Auto-calculate estimates
+document.getElementById('doDai').addEventListener('input', function() {
+    const distance = parseFloat(this.value);
+    if (distance) {
+        // Auto-estimate duration (average 50km/h for bus routes)
+        const estimatedDuration = Math.round((distance / 50) * 2) / 2;
+        document.getElementById('thoiGianDi').value = estimatedDuration;
+    }
+});
+
+// Auto-generate route code
+document.getElementById('diemDau').addEventListener('input', updateRouteCode);
+document.getElementById('diemCuoi').addEventListener('input', updateRouteCode);
+
+function updateRouteCode() {
+    const diemDau = document.getElementById('diemDau').value.trim();
+    const diemCuoi = document.getElementById('diemCuoi').value.trim();
+    
+    if (diemDau && diemCuoi) {
+        const code = `${diemDau}-${diemCuoi}`.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+        document.getElementById('maTuyenDuong').value = code;
+    }
+}
+
+// Enhanced table actions
+document.addEventListener('DOMContentLoaded', function() {
+    // Override default table actions for routes
+    const originalHandleRowAction = window.DataTable?.prototype?.handleRowAction;
+    
+    if (window.DataTable) {
+        window.DataTable.prototype.handleRowAction = function(action, element) {
+            const row = element.closest('tr');
+            const id = row.dataset.id;
+
+            switch (action) {
+                case 'schedule':
+                    this.manageSchedule(id, row);
+                    break;
+                default:
+                    if (originalHandleRowAction) {
+                        originalHandleRowAction.call(this, action, element);
+                    }
+            }
+        };
+        
+        window.DataTable.prototype.manageSchedule = function(id, row) {
+            const routeName = row.querySelector('.route-location strong')?.textContent || 'Unknown';
+            DashStackAdmin.utils.showToast(`Quản lý lịch trình cho tuyến: ${routeName}`, 'info');
+        };
+    }
+});
+
+// Form initialization
+document.getElementById('addRouteModal').addEventListener('shown.bs.modal', function() {
+    document.getElementById('maTuyenDuong').focus();
+});
+</script>
+{% endblock %}

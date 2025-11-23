@@ -1,0 +1,759 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Danh Sách Chuyến Xe{% endblock %}
+
+{% block styles %}
+<style>
+.trip-list-container {
+    padding: 2rem 0;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+.page-header {
+    background: #2196F3;
+    color: white;
+    padding: 2rem 0;
+    margin-bottom: 2rem;
+    border-radius: 15px;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 600;
+    margin: 0;
+    text-align: center;
+}
+
+.trip-stats {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2196F3;
+}
+
+.stat-label {
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.trip-table-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.trip-table {
+    margin: 0;
+}
+
+.trip-table thead {
+    background: #2196F3;
+    color: white;
+}
+
+.trip-table th {
+    border: none;
+    padding: 1rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.trip-table td {
+    padding: 1rem;
+    vertical-align: middle;
+    text-align: center;
+    border-bottom: 1px solid #eee;
+}
+
+.trip-row:hover {
+    background: #f8f9fa;
+    cursor: pointer;
+}
+
+.trip-id {
+    font-weight: 600;
+    color: #2196F3;
+}
+
+.vehicle-info {
+    text-align: left;
+}
+
+.vehicle-name {
+    font-weight: 600;
+    color: #333;
+}
+
+.vehicle-details {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+.route-info {
+    text-align: left;
+}
+
+.route-path {
+    font-weight: 500;
+    color: #333;
+}
+
+.route-time {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-chua-khoi-hanh {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-dang-cho {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.status-san-sang {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-da-khoi-hanh {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-da-hoan-thanh {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-da-huy {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.status-dang-chay {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-sap-chay {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-san-sang {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.status-dang-sua {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.booking-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.booking-badge {
+    background: #2196F3;
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.btn-action {
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    border: none;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 32px;
+    height: 32px;
+}
+
+.btn-view {
+    background: #17a2b8;
+    color: white;
+}
+
+.btn-view:hover {
+    background: #138496;
+}
+
+.btn-edit {
+    background: #28a745;
+    color: white;
+}
+
+.btn-edit:hover {
+    background: #218838;
+}
+
+.btn-delete {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #c82333;
+}
+
+.btn-view {
+    background: #007bff;
+    color: white;
+}
+
+.btn-view:hover {
+    background: #0056b3;
+}
+
+/* Search and Filter Styles */
+.search-filter-container {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.search-form {
+    margin: 0;
+}
+
+.search-input-group {
+    position: relative;
+}
+
+.search-input-group i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+    z-index: 2;
+}
+
+.search-input {
+    padding-left: 45px;
+    border: 2px solid #e9ecef;
+    border-radius: 25px;
+    height: 45px;
+    font-size: 0.95rem;
+}
+
+.search-input:focus {
+    border-color: #2196F3;
+    box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+}
+
+.filter-select {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    height: 45px;
+    font-size: 0.95rem;
+}
+
+.filter-select:focus {
+    border-color: #2196F3;
+    box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+}
+
+.date-input {
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    height: 45px;
+    font-size: 0.95rem;
+}
+
+.date-input:focus {
+    border-color: #2196F3;
+    box-shadow: 0 0 0 0.2rem rgba(33, 150, 243, 0.25);
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    height: 45px;
+}
+
+.btn-filter {
+    background: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0 1.5rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+}
+
+.btn-filter:hover {
+    background: #1976D2;
+    transform: translateY(-1px);
+}
+
+.btn-reset {
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 45px;
+}
+
+.btn-reset:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    color: white;
+    text-decoration: none;
+}
+
+.filter-results {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.results-count {
+    font-weight: 600;
+    color: #2196F3;
+}
+
+.active-filters {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-tag {
+    background: #e3f2fd;
+    color: #1976D2;
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.btn-create-new {
+    background: linear-gradient(45deg, #4CAF50, #45a049);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.btn-create-new:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(76,175,80,0.3);
+    color: white;
+    text-decoration: none;
+}
+
+.pagination-container {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #666;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #ddd;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .trip-table-container {
+        overflow-x: auto;
+    }
+    
+    .trip-table {
+        min-width: 800px;
+    }
+    
+    .stat-item {
+        margin-bottom: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="trip-list-container">
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">
+                <i class="bi bi-bus-front"></i> Quản Lý Chuyến Xe
+            </h1>
+        </div>
+
+        <!-- Trip Statistics -->
+        <div class="trip-stats">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stats.total }}</div>
+                        <div class="stat-label">Tổng Chuyến</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stats.sap_chay }}</div>
+                        <div class="stat-label">Sắp Chạy</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stats.dang_chay }}</div>
+                        <div class="stat-label">Đang Chạy</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ stats.da_hoan_thanh }}</div>
+                        <div class="stat-label">Hoàn Thành</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filter Form -->
+        <div class="search-filter-container">
+            <form method="GET" class="search-form">
+                <div class="row">
+                    <!-- Search Input -->
+                    <div class="col-md-4">
+                        <div class="search-input-group">
+                            <i class="bi bi-search"></i>
+                            <input type="text" name="search" class="form-control search-input" 
+                                   placeholder="Tìm kiếm mã chuyến, tuyến đường, tài xế..." 
+                                   value="{{ search_query }}">
+                        </div>
+                    </div>
+                    
+                    <!-- Status Filter -->
+                    <div class="col-md-2">
+                        <select name="status" class="form-select filter-select">
+                            <option value="">Tất cả trạng thái</option>
+                            {% for status in all_statuses %}
+                            <option value="{{ status }}" {% if status_filter == status %}selected{% endif %}>
+                                {{ status }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Route Filter -->
+                    <div class="col-md-2">
+                        <select name="route" class="form-select filter-select">
+                            <option value="">Tất cả tuyến</option>
+                            {% for route in all_routes %}
+                            <option value="{{ route }}" {% if route_filter == route %}selected{% endif %}>
+                                {{ route }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Date Range -->
+                    <div class="col-md-2">
+                        <input type="date" name="date_from" class="form-control date-input" 
+                               placeholder="Từ ngày" value="{{ date_from }}">
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <div class="filter-buttons">
+                            <button type="submit" class="btn-filter">
+                                <i class="bi bi-funnel"></i>
+                                Lọc
+                            </button>
+                            <a href="{{ url_for('admin.trip_list') }}" class="btn-reset">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Results Info -->
+                {% if search_query or status_filter or route_filter or date_from %}
+                <div class="filter-results">
+                    <span class="results-count">
+                        Tìm thấy {{ total_filtered }} kết quả
+                        {% if search_query %}cho "{{ search_query }}"{% endif %}
+                    </span>
+                    <div class="active-filters">
+                        {% if status_filter %}
+                        <span class="filter-tag">Trạng thái: {{ status_filter }}</span>
+                        {% endif %}
+                        {% if route_filter %}
+                        <span class="filter-tag">Tuyến: {{ route_filter }}</span>
+                        {% endif %}
+                        {% if date_from %}
+                        <span class="filter-tag">Từ: {{ date_from }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Create New Trip Button -->
+        <a href="{{ url_for('admin.create_trip') }}" class="btn-create-new">
+            <i class="bi bi-plus-circle"></i>
+            Tạo Chuyến Xe Mới
+        </a>
+
+        <!-- Trip List Table -->
+        <div class="trip-table-container">
+            {% if trips %}
+            <table class="table trip-table">
+                <thead>
+                    <tr>
+                        <th>Mã Chuyến</th>
+                        <th>Thông Tin Xe</th>
+                        <th>Tuyến Đường</th>
+                        <th>Lịch Trình</th>
+                        <th>Tài Xế</th>
+                        <th>Đặt Vé</th>
+                        <th>Trạng Thái</th>
+                        <th>Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trip in trips %}
+                    <tr class="trip-row" onclick="viewTripDetails('{{ trip.maLichTrinh }}')">
+                        <td>
+                            <div class="trip-id">{{ trip.maLichTrinh }}</div>
+                        </td>
+                        <td>
+                            <div class="vehicle-info">
+                                {% if trip.vehicle_info %}
+                                <div class="vehicle-name">{{ trip.vehicle_info.ten }}</div>
+                                <div class="vehicle-details">
+                                    {{ trip.vehicle_info.bienSo }} • {{ trip.vehicle_info.tuyen }}
+                                </div>
+                                {% else %}
+                                <div class="vehicle-name">{{ trip.maXe }}</div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="route-info">
+                                <div class="route-path">{{ trip.diemDi }} → {{ trip.diemDen }}</div>
+                                {% if trip.tramDung %}
+                                <div class="route-time">
+                                    {{ trip.tramDung|length }} trạm dừng
+                                </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="route-time">
+                                <div><i class="bi bi-calendar"></i> {{ trip.ngayDi.strftime('%d/%m/%Y') }}</div>
+                                <div><i class="bi bi-clock"></i> {{ trip.gioDi }}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="vehicle-info">
+                                {% if trip.tenTaiXe %}
+                                <div class="vehicle-name">{{ trip.tenTaiXe }}</div>
+                                {% endif %}
+                                {% if trip.tenPhuXe %}
+                                <div class="vehicle-details">PX: {{ trip.tenPhuXe }}</div>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            <div class="booking-count">
+                                <i class="bi bi-people"></i>
+                                <span class="booking-badge">{{ trip.booking_count }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="status-badge status-{{ vietnamese_to_css_class(trip.tinhTrang) }}">
+                                {{ trip.tinhTrang }}
+                            </span>
+                        </td>
+                        <td onclick="event.stopPropagation()">
+                            <div class="action-buttons">
+                                <button class="btn-action btn-view" onclick="viewTrip('{{ trip.maLichTrinh }}')">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn-action btn-edit" onclick="editTrip('{{ trip.maLichTrinh }}')">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn-action btn-delete" onclick="deleteTrip('{{ trip.maLichTrinh }}', '{{ trip.diemDi }} → {{ trip.diemDen }}')">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination-container">
+                {% if total_trips > per_page %}
+                <nav>
+                    <ul class="pagination justify-content-center">
+                        {% if page > 1 %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.trip_list', page=page-1) }}">Trước</a>
+                        </li>
+                        {% endif %}
+                        
+                        {% set total_pages = (total_trips + per_page - 1) // per_page %}
+                        {% for p in range(1, total_pages + 1) %}
+                        <li class="page-item {{ 'active' if p == page else '' }}">
+                            <a class="page-link" href="{{ url_for('admin.trip_list', page=p) }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+                        
+                        {% if page < total_pages %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.trip_list', page=page+1) }}">Sau</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-bus-front-fill"></i>
+                <h3>Chưa có chuyến xe nào</h3>
+                <p>Hãy tạo chuyến xe đầu tiên để bắt đầu quản lý lịch trình</p>
+                <a href="{{ url_for('admin.create_trip') }}" class="btn-create-new">
+                    <i class="bi bi-plus-circle"></i>
+                    Tạo Chuyến Xe Đầu Tiên
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function viewTripDetails(tripId) {
+    // Navigate to trip details page
+    window.location.href = `/admin/LichTrinh`;
+}
+
+function viewTrip(tripId) {
+    // Navigate to trip detail page
+    window.location.href = `/admin/chi-tiet-chuyen-xe/${tripId}`;
+}
+
+function editTrip(tripId) {
+    // Navigate to edit trip page
+    window.location.href = `/admin/LichTrinh/edit/${tripId}`;
+}
+
+function deleteTrip(tripId, route) {
+    if (confirm(`Bạn có chắc chắn muốn xóa chuyến xe "${tripId}" (${route})?`)) {
+        fetch(`/admin/LichTrinh/delete/${tripId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Xóa chuyến xe thành công!');
+                location.reload();
+            } else {
+                alert('Có lỗi xảy ra khi xóa chuyến xe');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi xóa chuyến xe');
+        });
+    }
+}
+
+// Add smooth animations
+document.addEventListener('DOMContentLoaded', function() {
+    const rows = document.querySelectorAll('.trip-row');
+    rows.forEach((row, index) => {
+        row.style.opacity = '0';
+        row.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            row.style.transition = 'all 0.5s ease';
+            row.style.opacity = '1';
+            row.style.transform = 'translateY(0)';
+        }, index * 50);
+    });
+});
+</script>
+{% endblock %}

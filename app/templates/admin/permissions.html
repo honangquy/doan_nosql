@@ -1,0 +1,306 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Quyền hạn hệ thống{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0">
+                        <i class="fas fa-key me-2"></i>Quyền hạn hệ thống
+                    </h2>
+                    <p class="text-muted mb-0">Phân quyền chi tiết cho từng role trong hệ thống</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('admin.accounts') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-users me-2"></i>Quay lại tài khoản
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Cards -->
+    <div class="row">
+        {% for role, permissions in roles_permissions.items() %}
+        <div class="col-md-6 col-lg-3 mb-4">
+            <div class="card h-100 shadow-sm role-card" data-role="{{ role }}">
+                <div class="card-header text-white role-header-{{ role.lower() }}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-{% if role == 'QLVH' %}crown{% elif role == 'QLKT' %}calculator{% elif role == 'QLNS' %}users{% else %}headset{% endif %} me-2"></i>
+                            {{ role }}
+                        </h5>
+                        <span class="badge bg-light text-dark">{{ permissions|length }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Role Description -->
+                    <div class="mb-3">
+                        <h6 class="text-muted">Mô tả:</h6>
+                        <p class="small mb-0">
+                            {% if role == 'QLVH' %}
+                                <strong>Quản lý vận hành:</strong> Toàn quyền quản lý business logic, tuyến đường, lịch trình, xe khách
+                            {% elif role == 'QLKT' %}
+                                <strong>Quản lý kế toán:</strong> Quản lý tài chính, doanh thu, giá vé, báo cáo
+                            {% elif role == 'QLNS' %}
+                                <strong>Quản lý nhân sự:</strong> Quản lý tài khoản, nhân viên, phân quyền
+                            {% elif role == 'CSKH' %}
+                                <strong>Chăm sóc khách hàng:</strong> Hỗ trợ khách hàng, quản lý vé xe, tra cứu
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    <!-- Permissions List -->
+                    <div class="permissions-list">
+                        <h6 class="text-muted mb-2">Quyền hạn:</h6>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for permission in permissions %}
+                            <span class="badge permission-badge permission-{{ permission.replace('_', '-') }}">
+                                {{ permission }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <!-- Permission Categories -->
+                    <div class="mt-3">
+                        <small class="text-muted">Phân loại quyền:</small>
+                        <div class="mt-1">
+                            {% set business_perms = [] %}
+                            {% for perm in permissions %}
+                                {% if perm in ['tuyen_duong', 'lich_trinh', 'xe_khach', 'khach_hang', 've_xe'] %}
+                                    {% set _ = business_perms.append(perm) %}
+                                {% endif %}
+                            {% endfor %}
+                            {% set system_perms = [] %}
+                            {% for perm in permissions %}
+                                {% if perm in ['tai_khoan', 'nhan_vien', 'tin_tuc'] %}
+                                    {% set _ = system_perms.append(perm) %}
+                                {% endif %}
+                            {% endfor %}
+                            {% set finance_perms = [] %}
+                            {% for perm in permissions %}
+                                {% if perm in ['gia_ve', 'doanh_thu'] %}
+                                    {% set _ = finance_perms.append(perm) %}
+                                {% endif %}
+                            {% endfor %}
+                            {% set crud_perms = [] %}
+                            {% for perm in permissions %}
+                                {% if perm in ['create', 'read', 'update', 'delete'] %}
+                                    {% set _ = crud_perms.append(perm) %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if business_perms %}
+                            <div class="mb-1">
+                                <small class="text-success">
+                                    <i class="fas fa-bus me-1"></i>Business: {{ business_perms|length }}
+                                </small>
+                            </div>
+                            {% endif %}
+                            
+                            {% if system_perms %}
+                            <div class="mb-1">
+                                <small class="text-info">
+                                    <i class="fas fa-cog me-1"></i>Hệ thống: {{ system_perms|length }}
+                                </small>
+                            </div>
+                            {% endif %}
+                            
+                            {% if finance_perms %}
+                            <div class="mb-1">
+                                <small class="text-warning">
+                                    <i class="fas fa-dollar-sign me-1"></i>Tài chính: {{ finance_perms|length }}
+                                </small>
+                            </div>
+                            {% endif %}
+                            
+                            {% if crud_perms %}
+                            <div class="mb-1">
+                                <small class="text-primary">
+                                    <i class="fas fa-edit me-1"></i>CRUD: {{ crud_perms|length }}
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Role Stats Footer -->
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between text-muted small">
+                        <span>
+                            <i class="fas fa-shield-alt me-1"></i>
+                            Mức độ: 
+                            {% if permissions|length >= 10 %}Cao
+                            {% elif permissions|length >= 5 %}Trung bình
+                            {% else %}Thấp{% endif %}
+                        </span>
+                        <span>
+                            <i class="fas fa-list me-1"></i>
+                            {{ permissions|length }} quyền
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Permissions Matrix -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-dark text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table me-2"></i>Ma trận phân quyền
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="sticky-column">Quyền</th>
+                                    {% for role in roles_permissions.keys() %}
+                                    <th class="text-center role-col-{{ role.lower() }}">{{ role }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% set all_permissions = [] %}
+                                {% for perms in roles_permissions.values() %}
+                                    {% set _ = all_permissions.extend(perms) %}
+                                {% endfor %}
+                                {% set unique_permissions = all_permissions | unique | sort %}
+                                
+                                {% for permission in unique_permissions %}
+                                <tr>
+                                    <td class="sticky-column fw-bold">
+                                        <span class="badge permission-badge permission-{{ permission.replace('_', '-') }} me-2">
+                                            {{ permission }}
+                                        </span>
+                                    </td>
+                                    {% for role, role_perms in roles_permissions.items() %}
+                                    <td class="text-center">
+                                        {% if permission in role_perms %}
+                                        <i class="fas fa-check text-success"></i>
+                                        {% else %}
+                                        <i class="fas fa-times text-muted"></i>
+                                        {% endif %}
+                                    </td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.role-card {
+    border: none;
+    border-radius: 12px;
+    transition: transform 0.2s ease;
+}
+
+.role-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.role-header-qlvh { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.role-header-qlkt { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.role-header-qlns { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.role-header-cskh { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+
+.role-col-qlvh { background: rgba(102, 126, 234, 0.1); }
+.role-col-qlkt { background: rgba(240, 147, 251, 0.1); }
+.role-col-qlns { background: rgba(79, 172, 254, 0.1); }
+.role-col-cskh { background: rgba(67, 233, 123, 0.1); }
+
+.permission-badge {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+}
+
+/* Permission type colors */
+.permission-dashboard { background: #e3f2fd; color: #1976d2; }
+.permission-tuyen-duong { background: #f3e5f5; color: #7b1fa2; }
+.permission-lich-trinh { background: #e8f5e8; color: #388e3c; }
+.permission-xe-khach { background: #fff3e0; color: #f57c00; }
+.permission-khach-hang { background: #fce4ec; color: #c2185b; }
+.permission-ve-xe { background: #e0f2f1; color: #00695c; }
+.permission-gia-ve { background: #fff8e1; color: #f9a825; }
+.permission-nhan-vien { background: #e1f5fe; color: #0277bd; }
+.permission-tin-tuc { background: #f1f8e9; color: #689f38; }
+.permission-tai-khoan { background: #ffebee; color: #d32f2f; }
+.permission-doanh-thu { background: #f9fbe7; color: #827717; }
+.permission-thong-ke { background: #fafafa; color: #424242; }
+.permission-create { background: #e8f5e8; color: #2e7d32; }
+.permission-read { background: #e3f2fd; color: #1565c0; }
+.permission-update { background: #fff3e0; color: #ef6c00; }
+.permission-delete { background: #ffebee; color: #c62828; }
+
+.sticky-column {
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 1;
+    border-right: 2px solid #dee2e6;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+}
+
+.table th {
+    font-weight: 600;
+    color: #495057;
+}
+
+@media (max-width: 768px) {
+    .role-card {
+        margin-bottom: 1rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+</style>
+
+<script>
+// Interactive features
+document.addEventListener('DOMContentLoaded', function() {
+    // Highlight role column on hover
+    const roleHeaders = document.querySelectorAll('[class*="role-col-"]');
+    roleHeaders.forEach(header => {
+        const roleClass = Array.from(header.classList).find(cls => cls.startsWith('role-col-'));
+        const role = roleClass.replace('role-col-', '').toUpperCase();
+        
+        header.addEventListener('mouseenter', function() {
+            document.querySelectorAll(`[class*="role-col-${role.toLowerCase()}"]`).forEach(cell => {
+                cell.style.backgroundColor = 'rgba(0,0,0,0.1)';
+            });
+        });
+        
+        header.addEventListener('mouseleave', function() {
+            document.querySelectorAll(`[class*="role-col-${role.toLowerCase()}"]`).forEach(cell => {
+                cell.style.backgroundColor = '';
+            });
+        });
+    });
+});
+</script>
+{% endblock %}

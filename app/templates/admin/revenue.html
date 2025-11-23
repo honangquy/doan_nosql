@@ -1,0 +1,326 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Báo cáo doanh thu{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Báo cáo doanh thu
+                    </h2>
+                    <p class="text-muted mb-0">Thống kê doanh thu và tình hình kinh doanh</p>
+                </div>
+                <div>
+                    <span class="badge bg-success fs-6">QLKT & QLVH</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-gradient-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-1">{{ "{:,.0f}".format(total_revenue) }} VND</h3>
+                            <p class="mb-0">Tổng doanh thu</p>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-dollar-sign fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-gradient-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h3 class="mb-1">{{ monthly_revenue|length }}</h3>
+                            <p class="mb-0">Tháng có doanh thu</p>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-calendar-alt fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-gradient-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            {% if monthly_revenue %}
+                                {% set avg_revenue = (total_revenue / monthly_revenue|length) %}
+                                <h3 class="mb-1">{{ "{:,.0f}".format(avg_revenue) }}</h3>
+                            {% else %}
+                                <h3 class="mb-1">0</h3>
+                            {% endif %}
+                            <p class="mb-0">TB doanh thu/tháng</p>
+                        </div>
+                        <div class="text-end">
+                            <i class="fas fa-chart-bar fa-2x opacity-75"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Revenue Chart -->
+    {% if monthly_revenue %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-area me-2"></i>Biểu đồ doanh thu theo tháng
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Monthly Revenue Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0">
+                        <i class="fas fa-table me-2"></i>Chi tiết doanh thu theo tháng
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if monthly_revenue %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Tháng/Năm</th>
+                                    <th class="text-end">Doanh thu (VND)</th>
+                                    <th class="text-end">Tỷ lệ (%)</th>
+                                    <th class="text-center">Biểu đồ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for month, revenue in monthly_revenue.items() | sort %}
+                                {% set percentage = (revenue / total_revenue * 100) if total_revenue > 0 else 0 %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        <strong>{{ month }}</strong>
+                                        <br><small class="text-muted">Tháng {{ month.split('-')[1] }}/{{ month.split('-')[0] }}</small>
+                                    </td>
+                                    <td class="text-end">
+                                        <strong class="text-success">{{ "{:,.0f}".format(revenue) }}</strong>
+                                    </td>
+                                    <td class="text-end">
+                                        <span class="badge bg-{% if percentage >= 15 %}success{% elif percentage >= 10 %}warning{% else %}secondary{% endif %}">
+                                            {{ "%.1f"|format(percentage) }}%
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="progress" style="height: 8px; width: 100px; margin: 0 auto;">
+                                            <div class="progress-bar bg-{% if percentage >= 15 %}success{% elif percentage >= 10 %}warning{% else %}info{% endif %}" 
+                                                 style="width: {{ percentage }}%" 
+                                                 title="{{ "%.1f"|format(percentage) }}%"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-dark">
+                                <tr>
+                                    <td colspan="2"><strong>Tổng cộng</strong></td>
+                                    <td class="text-end"><strong>{{ "{:,.0f}".format(total_revenue) }} VND</strong></td>
+                                    <td class="text-end"><strong>100.0%</strong></td>
+                                    <td></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Chưa có dữ liệu doanh thu</h5>
+                        <p class="text-muted">Hệ thống chưa ghi nhận doanh thu nào</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue Analysis -->
+    {% if monthly_revenue %}
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-arrow-up me-2"></i>Tháng có doanh thu cao nhất
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% set max_month = monthly_revenue | dictsort(by='value') | last %}
+                    <h4 class="text-success">{{ max_month[0] }}</h4>
+                    <p class="mb-0">Doanh thu: <strong>{{ "{:,.0f}".format(max_month[1]) }} VND</strong></p>
+                    <small class="text-muted">Chiếm {{ "%.1f"|format(max_month[1] / total_revenue * 100) }}% tổng doanh thu</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-warning text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-arrow-down me-2"></i>Tháng có doanh thu thấp nhất
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% set min_month = monthly_revenue | dictsort(by='value') | first %}
+                    <h4 class="text-warning">{{ min_month[0] }}</h4>
+                    <p class="mb-0">Doanh thu: <strong>{{ "{:,.0f}".format(min_month[1]) }} VND</strong></p>
+                    <small class="text-muted">Chiếm {{ "%.1f"|format(min_month[1] / total_revenue * 100) }}% tổng doanh thu</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Chart.js Script -->
+{% if monthly_revenue %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('revenueChart').getContext('2d');
+
+// Prepare data
+const monthlyData = {{ monthly_revenue | tojson | safe }};
+const labels = Object.keys(monthlyData).sort();
+const revenues = labels.map(month => monthlyData[month]);
+
+const revenueChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: labels,
+        datasets: [{
+            label: 'Doanh thu (VND)',
+            data: revenues,
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: 'rgb(75, 192, 192)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 6
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top'
+            },
+            title: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function(value) {
+                        return new Intl.NumberFormat('vi-VN').format(value) + ' VND';
+                    }
+                }
+            },
+            x: {
+                title: {
+                    display: true,
+                    text: 'Tháng/Năm'
+                }
+            }
+        },
+        interaction: {
+            intersect: false,
+            mode: 'index'
+        },
+        tooltips: {
+            callbacks: {
+                label: function(context) {
+                    return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN').format(context.parsed.y) + ' VND';
+                }
+            }
+        }
+    }
+});
+</script>
+{% endif %}
+
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.bg-gradient-success {
+    background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+}
+
+.bg-gradient-info {
+    background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.progress {
+    border-radius: 10px;
+}
+
+.table th {
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.opacity-75 {
+    opacity: 0.75;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+    .card-body h3 {
+        font-size: 1.5rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+}
+</style>
+{% endblock %}

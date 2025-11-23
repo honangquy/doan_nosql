@@ -1,0 +1,419 @@
+/* Modern Seat Map Styles - Improved Design */
+
+.seat-map-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.seat-legend {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-bottom: 25px;
+    padding: 15px;
+    background: rgba(248, 249, 250, 0.8);
+    border-radius: 12px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #495057;
+}
+
+.legend-color {
+    width: 24px;
+    height: 20px;
+    border-radius: 6px;
+    border: none;
+    position: relative;
+}
+
+.legend-color::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 4px;
+    border-radius: 2px;
+    background: inherit;
+}
+
+/* Modern Seat Status Colors */
+.seat-available {
+    background: linear-gradient(145deg, #87CEEB, #5DADE2);
+    color: #2C3E50;
+    border: 2px solid #5499C7;
+}
+
+.seat-occupied {
+    background: linear-gradient(145deg, #BDC3C7, #95A5A6);
+    color: #2C3E50;
+    border: 2px solid #7F8C8D;
+}
+
+.seat-selected {
+    background: linear-gradient(145deg, #F39C12, #E67E22);
+    color: white;
+    border: 2px solid #D68910;
+    box-shadow: 0 0 15px rgba(243, 156, 18, 0.4);
+}
+
+.seat-unavailable {
+    background: linear-gradient(145deg, #E8E8E8, #D5D8DC);
+    border: 2px solid #BDC3C7;
+    color: #7F8C8D;
+    cursor: not-allowed;
+}
+
+/* Legend Colors - Matching seat colors */
+.legend-available {
+    background: linear-gradient(145deg, #87CEEB, #5DADE2);
+}
+
+.legend-occupied {
+    background: linear-gradient(145deg, #BDC3C7, #95A5A6);
+}
+
+.legend-selected {
+    background: linear-gradient(145deg, #F39C12, #E67E22);
+}
+
+.legend-unavailable {
+    background: linear-gradient(145deg, #E8E8E8, #D5D8DC);
+}
+
+/* Modern Bus Layout */
+.bus-layout {
+    background: linear-gradient(135deg, #FAFBFC 0%, #F4F6F8 100%);
+    border-radius: 20px;
+    padding: 35px 25px;
+    border: 2px solid #E5E8EB;
+    position: relative;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.bus-layout::before {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%;
+    height: 6px;
+    background: linear-gradient(90deg, #3498DB, #2980B9);
+    border-radius: 3px;
+    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+}
+
+.floor-section {
+    margin-bottom: 35px;
+    padding: 25px 15px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+    border: 1px solid rgba(229, 232, 235, 0.6);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.floor-title {
+    text-align: center;
+    font-weight: 600;
+    color: #2C3E50;
+    margin-bottom: 20px;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.1), rgba(41, 128, 185, 0.1));
+    border: 1px solid rgba(52, 152, 219, 0.2);
+    border-radius: 25px;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+}
+
+.seats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 15px;
+    padding: 0 20px;
+    justify-items: center;
+    max-width: 400px;
+    margin: 0 auto 15px auto;
+}
+
+.seat-group {
+    display: contents;
+}
+
+.aisle {
+    grid-column: span 1;
+    text-align: center;
+    color: #95A5A6;
+    font-size: 10px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 45px;
+}
+
+.seat {
+    width: 50px;
+    height: 45px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Seat shape with backrest */
+.seat::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 42px;
+    height: 8px;
+    border-radius: 8px 8px 0 0;
+    background: inherit;
+    border: inherit;
+    border-bottom: none;
+}
+
+.seat:hover:not(.seat-occupied):not(.seat-unavailable) {
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    z-index: 10;
+}
+
+/* Seat animations and focus */
+.seat:active {
+    transform: translateY(1px) scale(0.98);
+}
+
+.seat:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.3);
+}
+
+/* Seat placeholder for grid alignment */
+.seat-placeholder {
+    width: 50px;
+    height: 45px;
+    visibility: hidden;
+}
+
+/* Seat Type Indicators with better styling */
+.seat-cabin::after {
+    content: '🛏️';
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seat-giuong::after {
+    content: '🛌';
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seat-ghe::after {
+    content: '💺';
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Enhanced Responsive Design for Grid Layout */
+@media (max-width: 768px) {
+    .seat-map-container {
+        padding: 15px;
+    }
+    
+    .seats-row {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 8px;
+        padding: 0 10px;
+        max-width: 300px;
+    }
+    
+    .seat, .seat-placeholder {
+        width: 32px;
+        height: 30px;
+        font-size: 9px;
+    }
+    
+    .seat::before {
+        width: 28px;
+        height: 4px;
+    }
+    
+    .seat-legend {
+        gap: 15px;
+        padding: 12px;
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+    
+    .legend-item {
+        font-size: 12px;
+    }
+    
+    .bus-layout {
+        padding: 20px 10px;
+    }
+    
+    .floor-section {
+        padding: 15px 8px;
+        margin-bottom: 25px;
+    }
+    
+    .floor-title {
+        font-size: 14px;
+        margin-bottom: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .seats-row {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 6px;
+        padding: 0 5px;
+        max-width: 250px;
+    }
+    
+    .seat, .seat-placeholder {
+        width: 28px;
+        height: 26px;
+        font-size: 8px;
+        border-radius: 6px;
+    }
+    
+    .seat::before {
+        width: 24px;
+        height: 3px;
+    }
+    
+    .bus-layout {
+        padding: 15px 8px;
+    }
+    
+    .floor-section {
+        padding: 12px 5px;
+    }
+    
+    .seat-legend {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
+}
+
+/* Loading State */
+.seat-map-loading {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+}
+
+.seat-map-loading .spinner-border {
+    margin-bottom: 15px;
+}
+
+/* Error State */
+.seat-map-error {
+    text-align: center;
+    padding: 40px;
+    color: #dc3545;
+}
+
+/* Enhanced Tooltip Styles */
+.seat-tooltip {
+    position: absolute;
+    background: linear-gradient(135deg, rgba(44, 62, 80, 0.95), rgba(52, 73, 94, 0.95));
+    color: white;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    pointer-events: none;
+    z-index: 1000;
+    transform: translate(-50%, -100%);
+    margin-top: -12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    min-width: 120px;
+    text-align: center;
+}
+
+.seat-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(44, 62, 80, 0.95);
+}
+
+/* Additional seat status for better UX */
+.seat-maintenance {
+    background: linear-gradient(145deg, #F7DC6F, #F4D03F);
+    border: 2px solid #F1C40F;
+    color: #7D6608;
+    cursor: not-allowed;
+}
+
+.legend-maintenance {
+    background: linear-gradient(145deg, #F7DC6F, #F4D03F);
+}
+
+/* Loading animation */
+@keyframes seatPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
+.seat-loading {
+    animation: seatPulse 1.5s ease-in-out infinite;
+}

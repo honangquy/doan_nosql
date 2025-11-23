@@ -1,0 +1,75 @@
+{% extends 'base_new.html' %}
+
+{% block title %}Đăng nhập - XeKhach.com{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="logo">
+                <i class="bi bi-bus-front-fill"></i>
+                <span>XeKhach.com</span>
+            </div>
+            <h2 class="auth-title">Chào mừng trở lại!</h2>
+            <p class="auth-subtitle">Đăng nhập để tiếp tục đặt vé</p>
+        </div>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label class="form-label" for="username">
+                    <i class="bi bi-person"></i> Tên đăng nhập
+                </label>
+                <input type="text" 
+                       class="form-control" 
+                       id="username" 
+                       name="username" 
+                       placeholder="Nhập tên đăng nhập"
+                       required>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="password">
+                    <i class="bi bi-lock"></i> Mật khẩu
+                </label>
+                <input type="password" 
+                       class="form-control" 
+                       id="password" 
+                       name="password" 
+                       placeholder="Nhập mật khẩu"
+                       required>
+            </div>
+            
+            <div class="form-group">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="remember">
+                    <label class="form-check-label" for="remember">
+                        Ghi nhớ đăng nhập
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-box-arrow-in-right"></i> Đăng nhập
+            </button>
+        </form>
+        
+        <div class="auth-divider">
+            <span>hoặc</span>
+        </div>
+        
+        <div class="d-grid gap-2">
+            <button class="btn btn-outline-primary" type="button">
+                <i class="bi bi-google"></i> Đăng nhập với Google
+            </button>
+            <button class="btn btn-outline-primary" type="button">
+                <i class="bi bi-facebook"></i> Đăng nhập với Facebook
+            </button>
+        </div>
+        
+        <div class="auth-link">
+            <p>Chưa có tài khoản? <a href="{{ url_for('auth.register') }}">Đăng ký ngay</a></p>
+            <p><a href="#forgot">Quên mật khẩu?</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

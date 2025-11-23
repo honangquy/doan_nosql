@@ -1,0 +1,254 @@
+{% extends 'base_new.html' %}
+
+{% block title %}Kết quả tìm kiếm - XeKhach.com{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-3">
+            <!-- Filter Sidebar -->
+            <div class="card border-accent mb-4">
+                <div class="card-header bg-gradient-primary text-white">
+                    <h6 class="mb-0"><i class="bi bi-funnel"></i> Bộ lọc tìm kiếm</h6>
+                </div>
+                <div class="card-body">
+                    <form action="{{ url_for('user.search') }}" method="GET">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Điểm đi</label>
+                            <select class="form-select" name="diem_di">
+                                <option value="">Tất cả</option>
+                                <option value="HCM" {{ 'selected' if request.args.get('diem_di') == 'HCM' }}>TP.HCM</option>
+                                <option value="HN" {{ 'selected' if request.args.get('diem_di') == 'HN' }}>Hà Nội</option>
+                                <option value="DN" {{ 'selected' if request.args.get('diem_di') == 'DN' }}>Đà Nẵng</option>
+                                <option value="CT" {{ 'selected' if request.args.get('diem_di') == 'CT' }}>Cần Thơ</option>
+                                <option value="DL" {{ 'selected' if request.args.get('diem_di') == 'DL' }}>Đà Lạt</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Điểm đến</label>
+                            <select class="form-select" name="diem_den">
+                                <option value="">Tất cả</option>
+                                <option value="HCM" {{ 'selected' if request.args.get('diem_den') == 'HCM' }}>TP.HCM</option>
+                                <option value="HN" {{ 'selected' if request.args.get('diem_den') == 'HN' }}>Hà Nội</option>
+                                <option value="DN" {{ 'selected' if request.args.get('diem_den') == 'DN' }}>Đà Nẵng</option>
+                                <option value="CT" {{ 'selected' if request.args.get('diem_den') == 'CT' }}>Cần Thơ</option>
+                                <option value="DL" {{ 'selected' if request.args.get('diem_den') == 'DL' }}>Đà Lạt</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Ngày đi</label>
+                            <input type="date" class="form-control" name="ngay_di" 
+                                   value="{{ request.args.get('ngay_di', '') }}">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Giá vé</label>
+                            <select class="form-select" name="gia_ve">
+                                <option value="">Tất cả</option>
+                                <option value="0-200000">Dưới 200.000đ</option>
+                                <option value="200000-400000">200.000đ - 400.000đ</option>
+                                <option value="400000-600000">400.000đ - 600.000đ</option>
+                                <option value="600000+">Trên 600.000đ</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Loại xe</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Giường nằm" id="giuong_nam">
+                                <label class="form-check-label" for="giuong_nam">Giường nằm</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Ghế ngồi" id="ghe_ngoi">
+                                <label class="form-check-label" for="ghe_ngoi">Ghế ngồi</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" value="Limousine" id="limousine">
+                                <label class="form-check-label" for="limousine">Limousine</label>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Lọc kết quả
+                        </button>
+                        
+                        <a href="{{ url_for('user.search') }}" class="btn btn-outline-secondary w-100 mt-2">
+                            <i class="bi bi-arrow-clockwise"></i> Xóa bộ lọc
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-9">
+            <!-- Search Results -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h3 class="text-primary-blue">
+                    <i class="bi bi-search"></i> Kết quả tìm kiếm
+                    <small class="text-muted">({{ lich_trinh|length }} chuyến)</small>
+                </h3>
+                
+                <div class="d-flex gap-2">
+                    <select class="form-select form-select-sm" style="width: auto;">
+                        <option>Sắp xếp theo</option>
+                        <option>Giá thấp nhất</option>
+                        <option>Giá cao nhất</option>
+                        <option>Thời gian khởi hành</option>
+                        <option>Thời gian đến</option>
+                    </select>
+                </div>
+            </div>
+            
+            {% if lich_trinh %}
+                {% for lt in lich_trinh %}
+                <div class="card mb-3 border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <div class="d-flex align-items-start">
+                                    <div class="me-3">
+                                        <div class="bg-gradient-primary text-white rounded p-2">
+                                            <i class="bi bi-bus-front fs-4"></i>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="flex-grow-1">
+                                        <h5 class="text-primary-blue mb-2">{{ lt.tenTuyenDuong }}</h5>
+                                        
+                                        <div class="row mb-2">
+                                            <div class="col-md-6">
+                                                <div class="d-flex align-items-center text-muted">
+                                                    <i class="bi bi-geo-alt me-2"></i>
+                                                    <span>{{ lt.diemDi }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="d-flex align-items-center text-muted">
+                                                    <i class="bi bi-geo-alt-fill me-2"></i>
+                                                    <span>{{ lt.diemDen }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="d-flex align-items-center text-muted">
+                                                    <i class="bi bi-calendar me-2"></i>
+                                                    <span>{{ lt.ngayDi }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="d-flex align-items-center text-muted">
+                                                    <i class="bi bi-clock me-2"></i>
+                                                    <span>{{ lt.gioDi }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mt-2">
+                                            <span class="badge bg-primary">{{ lt.bienSo }}</span>
+                                            <span class="badge bg-success ms-1">Còn chỗ</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-4 text-lg-end">
+                                <div class="mb-3">
+                                    <div class="h4 text-accent-yellow mb-1">350.000đ</div>
+                                    <small class="text-muted text-decoration-line-through">400.000đ</small>
+                                    <span class="badge bg-warning text-dark ms-1">-12%</span>
+                                </div>
+                                
+                                <div class="d-grid gap-2">
+                                    <a href="{{ url_for('user.booking', lich_trinh_id=lt._id) }}" 
+                                       class="btn btn-primary">
+                                        <i class="bi bi-ticket"></i> Đặt vé ngay
+                                    </a>
+                                    <button class="btn btn-outline-primary btn-sm" type="button" 
+                                            data-bs-toggle="collapse" data-bs-target="#details-{{ loop.index }}">
+                                        <i class="bi bi-info-circle"></i> Xem chi tiết
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Trip Details Collapse -->
+                        <div class="collapse mt-3" id="details-{{ loop.index }}">
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h6 class="text-primary-blue">Thông tin xe</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Ghế massage</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>WiFi miễn phí</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Điều hòa</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Nước uống</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-primary-blue">Chính sách</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-clock me-2"></i>Đổi vé: trước 2h</li>
+                                        <li><i class="bi bi-x-circle me-2"></i>Hủy vé: trước 4h</li>
+                                        <li><i class="bi bi-shield-check me-2"></i>Hoàn tiền 100%</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="text-primary-blue">Đánh giá</h6>
+                                    <div class="d-flex align-items-center">
+                                        <span class="h6 me-2">4.5</span>
+                                        <div class="text-warning">
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-fill"></i>
+                                            <i class="bi bi-star-half"></i>
+                                        </div>
+                                        <small class="text-muted ms-2">(156 đánh giá)</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <!-- Pagination -->
+                <nav aria-label="Search results pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1">Trước</a>
+                        </li>
+                        <li class="page-item active">
+                            <a class="page-link" href="#">1</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">2</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">3</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Sau</a>
+                        </li>
+                    </ul>
+                </nav>
+            {% else %}
+                <div class="text-center py-5">
+                    <div class="mb-4">
+                        <i class="bi bi-search display-1 text-muted"></i>
+                    </div>
+                    <h4 class="text-muted">Không tìm thấy chuyến xe nào</h4>
+                    <p class="text-muted">Vui lòng thử lại với điều kiện tìm kiếm khác</p>
+                    <a href="{{ url_for('user.index') }}" class="btn btn-primary">
+                        <i class="bi bi-house"></i> Về trang chủ
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

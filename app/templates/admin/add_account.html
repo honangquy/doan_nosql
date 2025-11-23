@@ -1,0 +1,193 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Thêm tài khoản{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('admin.accounts') }}">Quản lý tài khoản</a></li>
+            <li class="breadcrumb-item active">Thêm tài khoản</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>Thêm tài khoản mới
+                    </h4>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST" id="addAccountForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="username" class="form-label">Tên đăng nhập <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="username" name="username" required>
+                                <div class="form-text">Tên đăng nhập duy nhất cho hệ thống</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="password" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="password" name="password" required>
+                                    <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="full_name" class="form-label">Họ tên</label>
+                                <input type="text" class="form-control" id="full_name" name="full_name">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email">
+                                <div class="form-text">Email để liên hệ và thông báo</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="role" class="form-label">Role/Phân quyền <span class="text-danger">*</span></label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="">-- Chọn role --</option>
+                                {% for role in roles %}
+                                <option value="{{ role }}">{{ role }}</option>
+                                {% endfor %}
+                            </select>
+                            <div class="form-text">
+                                <small>
+                                    <strong>ADMIN:</strong> Toàn quyền hệ thống<br>
+                                    <strong>QLVH:</strong> Quản lý vận hành (Toàn quyền business)<br>
+                                    <strong>QLKT:</strong> Quản lý kế toán (Doanh thu, giá vé)<br>
+                                    <strong>QLNS:</strong> Quản lý nhân sự (Tài khoản, nhân viên)<br>
+                                    <strong>CSKH:</strong> Chăm sóc khách hàng (Khách hàng, vé xe)
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Role Permissions Preview -->
+                        <div class="mb-4" id="rolePermissions" style="display: none;">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">Quyền hạn của role này:</h6>
+                                    <div id="permissionsList"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ url_for('admin.accounts') }}" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>Hủy
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Tạo tài khoản
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle password visibility
+document.getElementById('togglePassword').addEventListener('click', function() {
+    const passwordInput = document.getElementById('password');
+    const icon = this.querySelector('i');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+});
+
+// Role permissions mapping
+const rolePermissions = {
+    'ADMIN': ['Toàn quyền hệ thống'],
+    'QLVH': ['dashboard', 'tuyen_duong', 'lich_trinh', 'xe_khach', 'khach_hang', 've_xe', 'gia_ve', 'nhan_vien', 'tin_tuc', 'tai_khoan', 'doanh_thu', 'thong_ke', 'create', 'read', 'update', 'delete'],
+    'QLKT': ['dashboard', 'gia_ve', 'doanh_thu', 'thong_ke', 've_xe', 'read', 'create', 'update'],
+    'QLNS': ['dashboard', 'nhan_vien', 'tai_khoan', 'thong_ke', 'read', 'create', 'update', 'delete'],
+    'CSKH': ['dashboard', 'khach_hang', 've_xe', 'lich_trinh', 'thong_ke', 'read', 'create', 'update']
+};
+
+// Show permissions when role is selected
+document.getElementById('role').addEventListener('change', function() {
+    const selectedRole = this.value;
+    const permissionsDiv = document.getElementById('rolePermissions');
+    const permissionsList = document.getElementById('permissionsList');
+    
+    if (selectedRole && rolePermissions[selectedRole]) {
+        const permissions = rolePermissions[selectedRole];
+        permissionsList.innerHTML = permissions.map(p => 
+            `<span class="badge bg-info me-1 mb-1">${p}</span>`
+        ).join('');
+        permissionsDiv.style.display = 'block';
+    } else {
+        permissionsDiv.style.display = 'none';
+    }
+});
+
+// Form validation
+document.getElementById('addAccountForm').addEventListener('submit', function(e) {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const role = document.getElementById('role').value;
+    
+    if (!username || !password || !role) {
+        e.preventDefault();
+        alert('Vui lòng điền đầy đủ các trường bắt buộc');
+        return false;
+    }
+    
+    if (username.length < 3) {
+        e.preventDefault();
+        alert('Tên đăng nhập phải có ít nhất 3 ký tự');
+        return false;
+    }
+    
+    if (password.length < 3) {
+        e.preventDefault();
+        alert('Mật khẩu phải có ít nhất 3 ký tự');
+        return false;
+    }
+});
+</script>
+
+<style>
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.badge {
+    font-size: 0.75rem;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.btn {
+    border-radius: 6px;
+}
+
+.input-group .btn {
+    border-radius: 0 6px 6px 0;
+}
+
+.breadcrumb-item a {
+    text-decoration: none;
+}
+</style>
+{% endblock %}

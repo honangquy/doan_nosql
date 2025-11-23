@@ -1,0 +1,1128 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Sơ Đồ Ghế - Admin Panel{% endblock %}
+
+{% block page_title %}Quản Lý Sơ Đồ Ghế{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+<li class="breadcrumb-item active">Sơ đồ Ghế</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Vehicle Selection -->
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-bus-front text-primary me-2"></i>
+                    Quản Lý Xe Khách
+                </h5>
+                <div class="card-actions">
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
+                        <i class="bi bi-plus-lg me-1"></i>Thêm Xe
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="vehicle-list">
+                    {% for seat_map in seat_maps %}
+                    <div class="vehicle-item-wrapper">
+                        <div class="vehicle-item" 
+                             onclick="showSeatMap(this)" 
+                             data-ma-xe="{{ seat_map.maXe }}"
+                             data-ten-xe="{{ seat_map.tenXe }}"
+                             data-layout="{{ seat_map.layout }}"
+                             data-so-ghe="{{ seat_map.soGhe }}"
+                             data-gia-ve="{{ seat_map.giaVe }}"
+                             data-phu-thu="{{ seat_map.phuThu }}"
+                             data-tuyen="{{ seat_map.tuyen }}"
+                             data-bien-so="{{ seat_map.bienSo }}"
+                             data-loai-xe="{{ seat_map.loaiXe }}"
+                             data-tinh-trang="{{ seat_map.tinhTrang }}"
+                             data-total-booked="{{ seat_map.totalBooked }}"
+                             data-total-empty="{{ seat_map.totalEmpty }}">
+                            <div class="vehicle-info">
+                                <h6 class="vehicle-name">{{ seat_map.tenXe }}</h6>
+                                <p class="vehicle-details">
+                                    <span class="badge bg-primary">{{ seat_map.maXe }}</span>
+                                    <span class="badge bg-info ms-1">{{ seat_map.loaiXe }}</span>
+                                    <span class="badge bg-{{ 'success' if seat_map.tinhTrang == 'Sẵn sàng' else 'warning' if seat_map.tinhTrang == 'Đang sửa' else 'secondary' }} ms-1">{{ seat_map.tinhTrang }}</span>
+                                </p>
+                                <small class="text-muted">
+                                    <i class="bi bi-car-front me-1"></i>{{ seat_map.bienSo }} • 
+                                    <i class="bi bi-grid-3x3-gap me-1"></i>{{ seat_map.soGhe }} ghế • 
+                                    Layout: {{ seat_map.layout }}
+                                </small>
+                                <div class="mt-1">
+                                    <small class="text-success me-2">
+                                        <i class="bi bi-currency-dollar me-1"></i>{{ "{:,.0f}".format(seat_map.giaVe) }}đ
+                                    </small>
+                                    <small class="text-info me-2">
+                                        <i class="bi bi-geo-alt me-1"></i>{{ seat_map.tuyen }}
+                                    </small>
+                                    <small class="text-warning me-2">
+                                        <i class="bi bi-check-circle me-1"></i>{{ seat_map.totalBooked }}/{{ seat_map.soGhe }} đặt
+                                    </small>
+                                </div>
+                            </div>
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                        <div class="vehicle-actions">
+                            <button class="btn btn-outline-primary btn-sm" 
+                                    onclick="editVehicle('{{ seat_map.maXe }}', '{{ seat_map.tenXe }}', '{{ seat_map.loaiXe }}', '{{ seat_map.bienSo }}', '{{ seat_map.tinhTrang }}')" 
+                                    title="Chỉnh sửa">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" 
+                                    onclick="deleteVehicle('{{ seat_map.maXe }}', '{{ seat_map.tenXe }}')" 
+                                    title="Xóa">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        <p>Chưa có xe khách nào</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Seat Map Display -->
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="bi bi-grid-3x3-gap text-success me-2"></i>
+                    Sơ Đồ Ghế
+                </h5>
+                <div class="card-actions">
+                    <span id="selected-vehicle" class="badge bg-secondary">Chọn xe để xem sơ đồ</span>
+                    <button id="edit-seat-map" class="btn btn-outline-primary btn-sm ms-2" style="display: none;" 
+                            onclick="editSeatMap()">
+                        <i class="bi bi-pencil me-1"></i>Chỉnh sửa sơ đồ
+                    </button>
+                    <button id="save-seat-map" class="btn btn-success btn-sm ms-2" style="display: none;" 
+                            onclick="saveSeatMap()">
+                        <i class="bi bi-check-lg me-1"></i>Lưu thay đổi
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="seat-map-container">
+                    <div class="seat-map-placeholder">
+                        <i class="bi bi-grid-3x3-gap display-1 text-muted"></i>
+                        <h4 class="text-muted mt-3">Chọn xe khách để xem sơ đồ ghế</h4>
+                        <p class="text-muted">Sơ đồ ghế sẽ hiển thị ở đây</p>
+                    </div>
+                </div>
+                
+                <!-- Seat Legend -->
+                <div id="seat-legend" class="seat-legend mt-4" style="display: none;">
+                    <h6>Chú thích:</h6>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="seat-demo available"></div>
+                            <span>Ghế trống</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="seat-demo occupied"></div>
+                            <span>Đã đặt</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="seat-demo selected"></div>
+                            <span>Đang chọn</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="seat-demo maintenance"></div>
+                            <span>Bảo trì</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Vehicle Information Panel -->
+                <div id="vehicle-info-panel" class="mt-4" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h6 class="info-title">
+                                    <i class="bi bi-info-circle text-primary me-2"></i>Thông Tin Xe
+                                </h6>
+                                <div id="vehicle-details">
+                                    <!-- Vehicle details will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="info-card">
+                                <h6 class="info-title">
+                                    <i class="bi bi-currency-dollar text-success me-2"></i>Thông Tin Giá Vé
+                                </h6>
+                                <div id="pricing-details">
+                                    <!-- Pricing details will be populated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Booking Details Table -->
+                <div id="booking-details-panel" class="mt-4" style="display: none;">
+                    <div class="info-card">
+                        <h6 class="info-title">
+                            <i class="bi bi-people text-info me-2"></i>Chi Tiết Đặt Vé
+                        </h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover" id="booking-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Số Ghế</th>
+                                        <th>Trạng Thái</th>
+                                        <th>Tên Khách Hàng</th>
+                                        <th>Số Điện Thoại</th>
+                                        <th>Ngày Đặt</th>
+                                        <th>Trạng Thái Vé</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Booking data will be populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Seat Status Controls (Hidden by default) -->
+                <div id="seat-status-controls" class="mt-4" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Thông tin ghế được chọn:</h6>
+                            <div id="selected-seat-info">
+                                <p class="text-muted">Chưa chọn ghế nào</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Thay đổi trạng thái ghế:</h6>
+                            <div class="btn-group d-grid gap-2 d-md-flex" role="group">
+                                <button class="btn btn-success btn-sm" onclick="setSeatStatus('available')">
+                                    <i class="bi bi-check-circle me-1"></i>Ghế trống
+                                </button>
+                                <button class="btn btn-danger btn-sm" onclick="setSeatStatus('occupied')">
+                                    <i class="bi bi-x-circle me-1"></i>Đã đặt
+                                </button>
+                                <button class="btn btn-warning btn-sm" onclick="setSeatStatus('maintenance')">
+                                    <i class="bi bi-tools me-1"></i>Bảo trì
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block styles %}
+<style>
+.vehicle-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.vehicle-item-wrapper {
+    position: relative;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--border-radius);
+    background: var(--gray-50);
+    transition: var(--transition);
+}
+
+.vehicle-item-wrapper:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(0,123,255,0.1);
+}
+
+.vehicle-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    width: 100%;
+}
+
+.vehicle-info {
+    flex: 1;
+    min-width: 0; /* Allow text truncation */
+}
+
+.vehicle-actions {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: none;
+    gap: 0.25rem;
+}
+
+.vehicle-item-wrapper:hover .vehicle-actions {
+    display: flex;
+}
+
+.vehicle-item:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-color);
+}
+
+.vehicle-item.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.vehicle-name {
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+}
+
+.vehicle-details {
+    margin: 0.25rem 0;
+}
+
+.seat-map-container {
+    min-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seat-map-placeholder {
+    text-align: center;
+    padding: 3rem;
+}
+
+.seat-grid {
+    display: grid;
+    gap: 8px;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.seat-grid.layout-2x2 {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 200px;
+}
+
+.seat-grid.layout-2x1 {
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 150px;
+}
+
+.seat {
+    width: 35px;
+    height: 35px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.seat.available {
+    background: #d4edda;
+    border-color: #28a745;
+    color: #155724;
+}
+
+.seat.occupied {
+    background: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+
+.seat.selected {
+    background: #fff3cd;
+    border-color: #ffc107;
+    color: #856404;
+    transform: scale(1.1);
+}
+
+.seat.maintenance {
+    background: #f0f0f0;
+    border-color: #6c757d;
+    color: #495057;
+}
+
+.seat:hover:not(.occupied) {
+    transform: scale(1.05);
+}
+
+.seat.aisle-right {
+    margin-right: 20px;
+}
+
+.seat-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.legend-items {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.seat-demo {
+    width: 20px;
+    height: 20px;
+    border: 2px solid;
+    border-radius: 4px;
+}
+
+.bus-layout {
+    position: relative;
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+}
+
+.bus-front {
+    text-align: center;
+    padding: 10px;
+    background: var(--primary-color);
+    color: white;
+    border-radius: 10px 10px 0 0;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.driver-area {
+    text-align: right;
+    padding: 5px 10px;
+    font-size: 12px;
+    color: var(--gray-600);
+    margin-bottom: 10px;
+}
+
+/* Info panels styles */
+.info-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.info-title {
+    color: #333;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #666;
+    min-width: 120px;
+}
+
+.info-value {
+    color: #333;
+    font-weight: 500;
+}
+
+/* Booking table styles */
+#booking-table {
+    font-size: 0.9rem;
+}
+
+#booking-table th {
+    background-color: #f8f9fa;
+    border-color: #e0e0e0;
+    font-weight: 600;
+    color: #333;
+}
+
+#booking-table td {
+    border-color: #e0e0e0;
+    vertical-align: middle;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentVehicle = null;
+let seatStatuses = {};
+
+// Auto-show seat map if vehicle parameter is provided
+{% if selected_vehicle_id %}
+document.addEventListener('DOMContentLoaded', function() {
+    // Find the vehicle element with matching ID
+    const vehicleElement = document.querySelector('[data-ma-xe="{{ selected_vehicle_id }}"]');
+    if (vehicleElement) {
+        showSeatMap(vehicleElement);
+        
+        // Scroll to the seat map section  
+        setTimeout(function() {
+            const seatMapSection = document.getElementById('seat-map-section');
+            if (seatMapSection) {
+                seatMapSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }, 100);
+    }
+});
+{% endif %}
+
+function showSeatMap(element) {
+    console.log('showSeatMap called with element:', element);
+    
+    try {
+        // Extract data from element attributes
+        const vehicleId = element.dataset.maXe;
+        const vehicleName = element.dataset.tenXe;
+        const layout = element.dataset.layout;
+        const totalSeats = parseInt(element.dataset.soGhe);
+        const giaVe = parseFloat(element.dataset.giaVe) || 0;
+        const phuThu = parseFloat(element.dataset.phuThu) || 0;
+        const tuyen = element.dataset.tuyen;
+        const bienSo = element.dataset.bienSo;
+        const loaiXe = element.dataset.loaiXe;
+        const tinhTrang = element.dataset.tinhTrang;
+        const totalBooked = parseInt(element.dataset.totalBooked) || 0;
+        const totalEmpty = parseInt(element.dataset.totalEmpty) || totalSeats;
+        
+        console.log('Vehicle data:', {vehicleId, vehicleName, layout, totalSeats});
+        
+        currentVehicle = vehicleId;
+    
+    // Update selected vehicle badge
+    document.getElementById('selected-vehicle').textContent = `${vehicleName} (${vehicleId})`;
+    document.getElementById('selected-vehicle').className = 'badge bg-primary';
+    
+    // Clear previous selection
+    document.querySelectorAll('.vehicle-item').forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // Mark current vehicle as active
+    element.classList.add('active');
+    
+    // Load real seat data from API and then generate seat map
+    loadSeatDataAndGenerate(vehicleId, layout, totalSeats, vehicleName, totalBooked, totalEmpty);
+    
+    // Show information panels
+    document.getElementById('seat-legend').style.display = 'block';
+    document.getElementById('vehicle-info-panel').style.display = 'block';
+    document.getElementById('booking-details-panel').style.display = 'block';
+    
+    // Populate vehicle information
+    const vehicleDetails = document.getElementById('vehicle-details');
+    if (vehicleDetails) {
+        vehicleDetails.innerHTML = `
+        <div class="info-row">
+            <span class="info-label">Mã xe:</span>
+            <span class="info-value">${vehicleId}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Biển số:</span>
+            <span class="info-value">${bienSo}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Loại xe:</span>
+            <span class="info-value">${loaiXe}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Tình trạng:</span>
+            <span class="badge bg-${tinhTrang === 'Hoạt động' ? 'success' : 'warning'}">${tinhTrang}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Ghế đã đặt:</span>
+            <span class="info-value">${totalBooked}/${totalSeats}</span>
+        </div>
+    `;
+    }
+    
+    // Populate pricing information
+    const pricingDetails = document.getElementById('pricing-details');
+    if (pricingDetails) {
+        pricingDetails.innerHTML = `
+        <div class="info-row">
+            <span class="info-label">Tuyến đường:</span>
+            <span class="info-value">${tuyen}</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Giá vé:</span>
+            <span class="info-value text-success fw-bold">${giaVe.toLocaleString('vi-VN')}đ</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Phụ thu:</span>
+            <span class="info-value">${phuThu.toLocaleString('vi-VN')}đ</span>
+        </div>
+        <div class="info-row">
+            <span class="info-label">Tổng cộng:</span>
+            <span class="info-value text-primary fw-bold">${(giaVe + phuThu).toLocaleString('vi-VN')}đ</span>
+        </div>
+    `;
+    }
+    
+    // Populate booking table - will be updated by loadSeatDataAndGenerate
+    const bookingTableBody = document.querySelector('#booking-table tbody');
+    bookingTableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Đang tải dữ liệu...</td></tr>';
+    
+    } catch (error) {
+        console.error('Error in showSeatMap:', error);
+        alert('Có lỗi khi hiển thị sơ đồ ghế. Vui lòng thử lại.');
+    }
+}
+
+function loadSeatDataAndGenerate(vehicleId, layout, totalSeats, vehicleName, totalBooked, totalEmpty) {
+    console.log('Loading seat data for vehicle:', vehicleId);
+    
+    // Show loading indicator
+    const container = document.getElementById('seat-map-container');
+    container.innerHTML = '<div class="text-center"><i class="bi bi-hourglass-split"></i> Đang tải dữ liệu ghế...</div>';
+    
+    // Call API to get real seat data
+    fetch(`/admin/api/seat-data/${vehicleId}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('Seat data received:', data);
+            
+            if (data.status === 'success') {
+                // Generate seat map with real data
+                generateSeatMapWithRealData(layout, totalSeats, vehicleName, data.seats);
+                
+                // Update booking table with real data
+                updateBookingTableWithRealData(data.seats, totalSeats);
+            } else {
+                console.error('Error loading seat data:', data.message);
+                // Fallback to default seat map
+                generateSeatMap(layout, totalSeats, vehicleName, []);
+            }
+        })
+        .catch(error => {
+            console.error('Error calling seat data API:', error);
+            // Fallback to default seat map
+            generateSeatMap(layout, totalSeats, vehicleName, []);
+        });
+}
+
+function generateSeatMapWithRealData(layout, totalSeats, vehicleName, seatData) {
+    const container = document.getElementById('seat-map-container');
+    
+    // Create bus layout
+    const busLayout = document.createElement('div');
+    busLayout.className = 'bus-layout';
+    
+    // Bus front
+    const busFront = document.createElement('div');
+    busFront.className = 'bus-front';
+    busFront.textContent = `${vehicleName} - Phía trước xe`;
+    busLayout.appendChild(busFront);
+    
+    // Driver area
+    const driverArea = document.createElement('div');
+    driverArea.className = 'driver-area';
+    driverArea.innerHTML = '<i class="bi bi-person-circle"></i> Tài xế';
+    busLayout.appendChild(driverArea);
+    
+    // Seat grid
+    const seatGrid = document.createElement('div');
+    seatGrid.className = `seat-grid layout-${layout}`;
+    
+    // Initialize seat statuses for this vehicle using real data
+    if (!seatStatuses[currentVehicle]) {
+        seatStatuses[currentVehicle] = {};
+    }
+    
+    for (let i = 1; i <= totalSeats; i++) {
+        const seat = document.createElement('div');
+        seat.className = 'seat';
+        seat.textContent = i.toString().padStart(2, '0');
+        seat.setAttribute('data-seat', i);
+        
+        // Check real seat status from API data
+        const seatNumber = `A${i.toString().padStart(2, '0')}`;
+        let seatStatus = 'available';
+        
+        // Check multiple possible seat number formats
+        const possibleFormats = [`A${i.toString().padStart(2, '0')}`, `A${i}`, `${i.toString().padStart(2, '0')}`, `${i}`];
+        
+        for (const format of possibleFormats) {
+            if (seatData[format]) {
+                seatStatus = seatData[format].status;
+                
+                // Create detailed tooltip
+                let tooltip = `Ghế ${format} - ${seatData[format].originalStatus}`;
+                if (seatData[format].customerName) {
+                    tooltip += `\nKhách hàng: ${seatData[format].customerName}`;
+                }
+                if (seatData[format].customerPhone) {
+                    tooltip += `\nSĐT: ${seatData[format].customerPhone}`;
+                }
+                if (seatData[format].bookingDate) {
+                    const date = new Date(seatData[format].bookingDate);
+                    tooltip += `\nNgày đặt: ${date.toLocaleDateString('vi-VN')}`;
+                }
+                if (seatData[format].ticketStatus) {
+                    tooltip += `\nTrạng thái vé: ${seatData[format].ticketStatus}`;
+                }
+                
+                seat.setAttribute('title', tooltip);
+                break;
+            }
+        }
+        
+        seatStatuses[currentVehicle][i] = seatStatus;
+        seat.classList.add(seatStatus);
+        
+        // Add aisle spacing for certain layouts
+        if (layout === '2x2' && i % 4 === 2) {
+            seat.classList.add('aisle-right');
+        }
+        if (layout === '2x1' && i % 3 === 2) {
+            seat.classList.add('aisle-right');
+        }
+        
+        seat.addEventListener('click', () => selectSeat(i));
+        
+        seatGrid.appendChild(seat);
+    }
+    
+    busLayout.appendChild(seatGrid);
+    container.innerHTML = '';
+    container.appendChild(busLayout);
+}
+
+function updateBookingTableWithRealData(seatData, totalSeats) {
+    const bookingTableBody = document.querySelector('#booking-table tbody');
+    bookingTableBody.innerHTML = '';
+    
+    // Create booking rows from real seat data
+    for (let i = 1; i <= totalSeats; i++) {
+        const possibleFormats = [`A${i.toString().padStart(2, '0')}`, `A${i}`, `${i.toString().padStart(2, '0')}`, `${i}`];
+        
+        let seatInfo = null;
+        let seatNumber = `A${i.toString().padStart(2, '0')}`;
+        
+        for (const format of possibleFormats) {
+            if (seatData[format]) {
+                seatInfo = seatData[format];
+                seatNumber = format;
+                break;
+            }
+        }
+        
+        const row = document.createElement('tr');
+        
+        if (seatInfo) {
+            const status = seatInfo.originalStatus || 'Trống';
+            const statusClass = status === 'Trống' ? 'text-success' : 
+                              status === 'Đã bán' ? 'text-danger' : 
+                              status === 'Đang giữ' ? 'text-warning' : 'text-secondary';
+            
+            // Get customer info from API data
+            const customerName = seatInfo.customerName || '';
+            const customerPhone = seatInfo.customerPhone || '';
+            const bookingDate = seatInfo.bookingDate || '';
+            const ticketStatus = seatInfo.ticketStatus || status;
+            
+            // Format booking date
+            let formattedDate = '';
+            if (bookingDate) {
+                try {
+                    const date = new Date(bookingDate);
+                    formattedDate = date.toLocaleDateString('vi-VN');
+                } catch (e) {
+                    formattedDate = bookingDate;
+                }
+            }
+            
+            row.innerHTML = `
+                <td><span class="badge bg-secondary">${seatNumber}</span></td>
+                <td><span class="${statusClass}">${status}</span></td>
+                <td>${customerName || '-'}</td>
+                <td>${customerPhone || '-'}</td>
+                <td>${formattedDate || '-'}</td>
+                <td><span class="badge bg-${ticketStatus === 'Đã thanh toán' ? 'success' : ticketStatus === 'Chờ thanh toán' ? 'warning' : 'secondary'}">${ticketStatus || status}</span></td>
+            `;
+        } else {
+            row.innerHTML = `
+                <td><span class="badge bg-secondary">${seatNumber}</span></td>
+                <td><span class="text-success">Trống</span></td>
+                <td>-</td>
+                <td>-</td>
+                <td>-</td>
+                <td><span class="badge bg-secondary">Trống</span></td>
+            `;
+        }
+        
+        bookingTableBody.appendChild(row);
+    }
+}
+
+function generateSeatMap(layout, totalSeats, vehicleName, bookings = []) {
+    const container = document.getElementById('seat-map-container');
+    
+    // Create bus layout
+    const busLayout = document.createElement('div');
+    busLayout.className = 'bus-layout';
+    
+    // Bus front
+    const busFront = document.createElement('div');
+    busFront.className = 'bus-front';
+    busFront.textContent = `${vehicleName} - Phía trước xe`;
+    busLayout.appendChild(busFront);
+    
+    // Driver area
+    const driverArea = document.createElement('div');
+    driverArea.className = 'driver-area';
+    driverArea.innerHTML = '<i class="bi bi-person-circle"></i> Tài xế';
+    busLayout.appendChild(driverArea);
+    
+    // Seat grid
+    const seatGrid = document.createElement('div');
+    seatGrid.className = `seat-grid layout-${layout}`;
+    
+    // Create seat status map from bookings data
+    const seatStatusMap = {};
+    if (bookings && Array.isArray(bookings)) {
+        bookings.forEach(booking => {
+            const seatNumber = parseInt(booking.soGhe.replace(/[A-Z]/g, '')) || parseInt(booking.soGhe);
+            if (booking.tinhTrangGhe === 'Trống') {
+                seatStatusMap[seatNumber] = 'available';
+            } else if (booking.tinhTrangGhe === 'Đã đặt') {
+                seatStatusMap[seatNumber] = 'occupied';
+            } else {
+                seatStatusMap[seatNumber] = 'maintenance';
+            }
+        });
+    }
+    
+    // Initialize seat statuses for this vehicle using real data
+    if (!seatStatuses[currentVehicle]) {
+        seatStatuses[currentVehicle] = {};
+    }
+    
+    for (let i = 1; i <= totalSeats; i++) {
+        const seat = document.createElement('div');
+        seat.className = 'seat';
+        seat.textContent = i.toString().padStart(2, '0');
+        seat.setAttribute('data-seat', i);
+        
+        // Use real seat status from bookings data
+        const seatStatus = seatStatusMap[i] || 'available'; // Default to available if no data
+        seatStatuses[currentVehicle][i] = seatStatus;
+        seat.classList.add(seatStatus);
+        
+        // Add aisle spacing for certain layouts
+        if (layout === '2x2' && i % 4 === 2) {
+            seat.classList.add('aisle-right');
+        }
+        if (layout === '2x1' && i % 3 === 2) {
+            seat.classList.add('aisle-right');
+        }
+        
+        seat.addEventListener('click', () => selectSeat(i));
+        
+        seatGrid.appendChild(seat);
+    }
+    
+    busLayout.appendChild(seatGrid);
+    container.innerHTML = '';
+    container.appendChild(busLayout);
+}
+
+let selectedSeat = null;
+
+function selectSeat(seatNumber) {
+    // Clear previous selection
+    document.querySelectorAll('.seat.selected').forEach(seat => {
+        seat.classList.remove('selected');
+        seat.classList.add(seatStatuses[currentVehicle][seat.getAttribute('data-seat')]);
+    });
+    
+    // Select new seat
+    selectedSeat = seatNumber;
+    const seatElement = document.querySelector(`[data-seat="${seatNumber}"]`);
+    seatElement.classList.remove('available', 'occupied', 'maintenance');
+    seatElement.classList.add('selected');
+    
+    // Update seat info
+    const seatInfo = document.getElementById('selected-seat-info');
+    const status = seatStatuses[currentVehicle][seatNumber];
+    const statusText = {
+        'available': 'Ghế trống',
+        'occupied': 'Đã đặt',
+        'maintenance': 'Bảo trì'
+    };
+    
+    seatInfo.innerHTML = `
+        <p><strong>Ghế số:</strong> ${seatNumber}</p>
+        <p><strong>Trạng thái hiện tại:</strong> <span class="badge bg-secondary">${statusText[status]}</span></p>
+        <p><strong>Xe:</strong> ${currentVehicle}</p>
+    `;
+}
+
+function setSeatStatus(status) {
+    if (!selectedSeat || !currentVehicle) {
+        alert('Vui lòng chọn ghế trước');
+        return;
+    }
+    
+    // Update status
+    seatStatuses[currentVehicle][selectedSeat] = status;
+    
+    // Update visual
+    const seatElement = document.querySelector(`[data-seat="${selectedSeat}"]`);
+    seatElement.classList.remove('available', 'occupied', 'maintenance', 'selected');
+    seatElement.classList.add(status);
+    
+    // Update seat info
+    selectSeat(selectedSeat);
+    
+    // In a real app, you would save this to the database
+    console.log(`Seat ${selectedSeat} of vehicle ${currentVehicle} set to ${status}`);
+}
+
+// CRUD Functions for Vehicles
+function editVehicle(maXe, tenXe, loaiXe, bienSo, tinhTrang) {
+    // Populate edit form
+    document.getElementById('edit-maXeKhach').value = maXe;
+    document.getElementById('edit-ten').value = tenXe;
+    document.getElementById('edit-loaiXe').value = loaiXe;
+    document.getElementById('edit-bienSo').value = bienSo;
+    document.getElementById('edit-tinhTrang').value = tinhTrang;
+    
+    // Show edit modal
+    new bootstrap.Modal(document.getElementById('editVehicleModal')).show();
+}
+
+function deleteVehicle(maXe, tenXe) {
+    if (confirm(`Bạn có chắc chắn muốn xóa xe "${tenXe}" (${maXe})?`)) {
+        // Send delete request
+        fetch(`/admin/seat-map/delete/${maXe}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Xóa xe thành công!');
+                location.reload();
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi xảy ra khi xóa xe');
+        });
+    }
+}
+
+function editSeatMap() {
+    if (!currentVehicle) {
+        alert('Vui lòng chọn xe trước');
+        return;
+    }
+    
+    document.getElementById('edit-seat-map').style.display = 'none';
+    document.getElementById('save-seat-map').style.display = 'inline-block';
+    
+    // Enable seat editing mode
+    document.querySelectorAll('.seat').forEach(seat => {
+        seat.style.cursor = 'pointer';
+        seat.setAttribute('title', 'Click để thay đổi trạng thái');
+    });
+    
+    // Show seat status controls
+    document.getElementById('seat-status-controls').style.display = 'block';
+}
+
+function saveSeatMap() {
+    if (!currentVehicle) {
+        alert('Không có dữ liệu xe để lưu');
+        return;
+    }
+    
+    // Save seat map to database
+    fetch(`/admin/seat-map/save/${currentVehicle}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            seatStatuses: seatStatuses[currentVehicle]
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Lưu sơ đồ ghế thành công!');
+            document.getElementById('edit-seat-map').style.display = 'inline-block';
+            document.getElementById('save-seat-map').style.display = 'none';
+            document.getElementById('seat-status-controls').style.display = 'none';
+        } else {
+            alert('Lỗi: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi lưu');
+    });
+}
+</script>
+
+<!-- Add Vehicle Modal -->
+<div class="modal fade" id="addVehicleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Thêm Xe Khách Mới</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('admin.seat_map_add_vehicle') }}" method="POST">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Mã xe khách *</label>
+                            <input type="text" class="form-control" name="maXeKhach" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tên xe *</label>
+                            <input type="text" class="form-control" name="ten" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Loại xe *</label>
+                            <select class="form-select" name="maLoai" required>
+                                <option value="">Chọn loại xe</option>
+                                <option value="LT40">Limousine 40 chỗ</option>
+                                <option value="LC22">Xe khách 22 chỗ</option>
+                                <option value="LC32">Xe khách 32 chỗ</option>
+                                <option value="SB22">Sleeper Bus 22 giường</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Biển số *</label>
+                            <input type="text" class="form-control" name="bienSo" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Hãng sản xuất</label>
+                            <input type="text" class="form-control" name="hangSanXuat">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Màu sắc</label>
+                            <input type="text" class="form-control" name="mau">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Tình trạng *</label>
+                            <select class="form-select" name="tinhTrang" required>
+                                <option value="Sẵn sàng">Sẵn sàng</option>
+                                <option value="Đang sửa">Đang sửa</option>
+                                <option value="Hoạt động">Hoạt động</option>
+                                <option value="Bảo trì">Bảo trì</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Mô tả</label>
+                            <textarea class="form-control" name="moTa" rows="2"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Thêm xe</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Vehicle Modal -->
+<div class="modal fade" id="editVehicleModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Chỉnh Sửa Xe Khách</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('admin.seat_map_edit_vehicle') }}" method="POST">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Mã xe khách *</label>
+                            <input type="text" class="form-control" id="edit-maXeKhach" name="maXeKhach" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Tên xe *</label>
+                            <input type="text" class="form-control" id="edit-ten" name="ten" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Loại xe *</label>
+                            <select class="form-select" id="edit-loaiXe" name="maLoai" required>
+                                <option value="LT40">Limousine 40 chỗ</option>
+                                <option value="LC22">Xe khách 22 chỗ</option>
+                                <option value="LC32">Xe khách 32 chỗ</option>
+                                <option value="SB22">Sleeper Bus 22 giường</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Biển số *</label>
+                            <input type="text" class="form-control" id="edit-bienSo" name="bienSo" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Tình trạng *</label>
+                            <select class="form-select" id="edit-tinhTrang" name="tinhTrang" required>
+                                <option value="Sẵn sàng">Sẵn sàng</option>
+                                <option value="Đang sửa">Đang sửa</option>
+                                <option value="Hoạt động">Hoạt động</option>
+                                <option value="Bảo trì">Bảo trì</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

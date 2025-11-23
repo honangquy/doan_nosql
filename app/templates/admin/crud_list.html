@@ -1,0 +1,254 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}{{ schema.label }} - Admin Panel{% endblock %}
+
+{% block page_title %}Quản Lý {{ schema.label }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.table-compact {
+    font-size: 0.875rem;
+}
+.table-compact th {
+    padding: 0.5rem 0.75rem;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+    white-space: nowrap;
+}
+.table-compact td {
+    padding: 0.5rem 0.75rem;
+    vertical-align: middle;
+}
+.badge-sm {
+    font-size: 0.75rem;
+    padding: 0.25em 0.5em;
+}
+@media (max-width: 768px) {
+    .table-compact {
+        font-size: 0.8rem;
+    }
+    .table-compact th,
+    .table-compact td {
+        padding: 0.25rem 0.5rem;
+    }
+}
+.text-truncate-mobile {
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+@media (max-width: 576px) {
+    .text-truncate-mobile {
+        max-width: 100px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+<li class="breadcrumb-item active">{{ schema.label }}</li>
+{% endblock %}
+
+{% block content %}
+<!-- Stats Overview -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card modern-card">
+            <div class="stats-icon bg-primary-gradient">
+                <i class="bi bi-{{ 'bus-front' if collection_name == 'XeKhach' else 'calendar3' if collection_name == 'LichTrinh' else 'ticket-perforated' if collection_name == 'VeXe' else 'people' if collection_name == 'KhachHang' else 'person-gear' if collection_name == 'TaiKhoan' else 'newspaper' if collection_name == 'TinTuc' else 'geo-alt' if collection_name == 'DiaDiem' else 'grid' }}"></i>
+            </div>
+            <div class="stats-content">
+                <h3 class="stats-number">{{ items | length }}</h3>
+                <p class="stats-label">Tổng {{ schema.label }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card modern-card">
+            <div class="stats-icon bg-success-gradient">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="stats-content">
+                <h3 class="stats-number">{{ items | selectattr('tinhTrang', 'equalto', 'Hoạt động') | list | length if 'tinhTrang' in schema.fields else items | length }}</h3>
+                <p class="stats-label">Đang Hoạt Động</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card modern-card">
+            <div class="stats-icon bg-warning-gradient">
+                <i class="bi bi-clock-history"></i>
+            </div>
+            <div class="stats-content">
+                <h3 class="stats-number">{{ items | selectattr('ngayThem') | list | length }}</h3>
+                <p class="stats-label">Gần Đây</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card modern-card">
+            <div class="stats-icon bg-info-gradient">
+                <i class="bi bi-plus-circle"></i>
+            </div>
+            <div class="stats-content">
+                <a href="{{ url_for('admin.add_item', collection_name=collection_name) }}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg me-1"></i>Thêm Mới
+                </a>
+                <p class="stats-label mt-2">Thao Tác</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data Table -->
+<div class="row">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title">
+                    <i class="bi bi-table text-primary me-2"></i>
+                    Danh Sách {{ schema.label }}
+                </h5>
+                <div class="card-actions">
+                    <div class="input-group input-group-sm" style="width: 250px;">
+                        <span class="input-group-text"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Tìm kiếm..." id="searchInput">
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {% if items %}
+                <div class="table-responsive">
+                    <table class="table table-hover table-compact" id="dataTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width: 50px;" class="text-center">#</th>
+                                {% for field in schema.fields %}
+                                <th class="{{ 'text-center' if field == 'tinhTrang' else 'text-nowrap' if 'ma' in field.lower() else '' }}">
+                                    {% if field == 'role' %}Vai Trò
+                                    {% elif field == 'giaVe' %}Giá Vé
+                                    {% elif field == 'phuThu' %}Phụ Thu  
+                                    {% elif field == 'bienSo' %}Biển Số
+                                    {% elif field == 'diemDi' %}Điểm Đi
+                                    {% elif field == 'diemDen' %}Điểm Đến
+                                    {% elif field == 'diemDau' %}Điểm Đầu
+                                    {% elif field == 'diemCuoi' %}Điểm Cuối
+                                    {% elif field == 'maGhe' %}Mã Ghế
+                                    {% elif field == 'maKhach' %}Mã KH
+                                    {% elif field == 'maLichTrinh' %}Mã LT
+                                    {% elif field == 'maXeKhach' %}Mã Xe
+                                    {% elif field == 'maTuyenDuong' %}Mã Tuyến
+                                    {% elif field == 'maGiaVe' %}Mã Giá
+                                    {% elif field == 'maVe' %}Mã Vé
+                                    {% else %}{{ field | title | replace('ma', 'Mã ') | replace('ten', 'Tên ') | replace('diem', 'Điểm ') | replace('gio', 'Giờ ') | replace('ngay', 'Ngày ') | replace('tinh', 'Tình ') | replace('trang', 'Trạng ') }}
+                                    {% endif %}
+                                </th>
+                                {% endfor %}
+                                <th style="width: 100px;" class="text-center">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in items %}
+                            <tr>
+                                <td class="text-center text-muted small">{{ loop.index }}</td>
+                                {% for field in schema.fields %}
+                                <td class="{{ 'text-center' if field == 'tinhTrang' else 'text-nowrap' if 'ma' in field.lower() else '' }}">
+                                    {% if field == 'role' and collection_name == 'TaiKhoan' %}
+                                        {% set role_value = item.get('role') or item.get('maLoai') %}
+                                        {% if role_value %}
+                                            <span class="badge bg-{{ 'danger' if role_value == 'ADMIN' else 'primary' if role_value == 'QLVH' else 'warning' if role_value == 'QLKT' else 'info' if role_value == 'QLNS' else 'success' if role_value == 'CSKH' else 'secondary' }} badge-sm">
+                                                {% if role_value == 'ADMIN' %}Admin
+                                                {% elif role_value == 'QLVH' %}Vận hành
+                                                {% elif role_value == 'QLKT' %}Kế toán
+                                                {% elif role_value == 'QLNS' %}Nhân sự
+                                                {% elif role_value == 'CSKH' %}CSKH
+                                                {% else %}{{ role_value }}
+                                                {% endif %}
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary badge-sm">N/A</span>
+                                        {% endif %}
+                                    {% elif field == 'tinhTrang' %}
+                                        <span class="badge bg-{{ 'success' if item.get(field) == 'Hoạt động' else 'secondary' if item.get(field) == 'Không hoạt động' else 'warning' if item.get(field) == 'Draft' else 'info' }} badge-sm">
+                                            {% if item.get(field) == 'Hoạt động' %}Hoạt động
+                                            {% elif item.get(field) == 'Không hoạt động' %}Tạm dừng  
+                                            {% else %}{{ item.get(field, 'N/A') }}
+                                            {% endif %}
+                                        </span>
+                                    {% elif field in ['giaVe', 'phuThu'] and item.get(field) %}
+                                        <span class="text-success fw-bold">{{ '{:,}'.format(item[field]) if item[field] is number else item[field] }}₫</span>
+                                    {% elif field in ['ngayThem', 'ngayDi'] and item.get(field) %}
+                                        <span class="text-muted small">{{ item[field].strftime('%d/%m/%Y') if item[field] is not string else item[field] }}</span>
+                                    {% elif field == 'email' %}
+                                        <span class="text-primary small">{{ item.get(field, 'N/A') }}</span>
+                                    {% elif field == 'matKhau' %}
+                                        <code class="text-muted small">{{ '••••••••' if item.get(field) else 'N/A' }}</code>
+                                    {% elif 'ma' in field.lower() %}
+                                        <code class="text-dark small">{{ item.get(field, 'N/A') }}</code>
+                                    {% elif field in ['ten', 'tenTuyenDuong'] %}
+                                        <span class="fw-medium">{{ (item.get(field, 'N/A') | truncate(30)) if item.get(field) else 'N/A' }}</span>
+                                    {% else %}
+                                        {{ (item.get(field, 'N/A') | truncate(25)) if item.get(field) and item.get(field) | string | length > 25 else item.get(field, 'N/A') }}
+                                    {% endif %}
+                                </td>
+                                {% endfor %}
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{{ url_for('admin.edit_item', collection_name=collection_name, item_id=item._id) }}" 
+                                           class="btn btn-outline-primary" title="Chỉnh sửa">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{{ url_for('admin.delete_item', collection_name=collection_name, item_id=item._id) }}" 
+                                           class="btn btn-outline-danger" 
+                                           onclick="return confirm('Bạn có chắc chắn muốn xóa {{ schema.label.lower() }} này?')"
+                                           title="Xóa">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="bi bi-inbox display-1 text-muted"></i>
+                    <h4 class="text-muted mt-3">Chưa có {{ schema.label.lower() }} nào</h4>
+                    <p class="text-muted">Hãy thêm {{ schema.label.lower() }} đầu tiên để bắt đầu quản lý</p>
+                    <a href="{{ url_for('admin.add_item', collection_name=collection_name) }}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg me-1"></i>Thêm {{ schema.label }}
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Simple search functionality
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    const searchTerm = this.value.toLowerCase();
+    const tableRows = document.querySelectorAll('#dataTable tbody tr');
+    
+    tableRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+    });
+});
+
+// Auto refresh every 30 seconds
+setInterval(function() {
+    // In a real app, you might want to refresh data via AJAX
+    console.log('Auto refresh triggered');
+}, 30000);
+</script>
+{% endblock %}

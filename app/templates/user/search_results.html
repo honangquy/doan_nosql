@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+
+{% block title %}Kết quả tìm kiếm - XeKhach.com{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Search Summary -->
+    <div class="search-summary mb-4">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h2 class="search-title">
+                    <i class="bi bi-search"></i> Kết quả tìm kiếm
+                </h2>
+                <p class="search-info">
+                    <strong>{{ search_params.diem_di }}</strong> 
+                    <i class="bi bi-arrow-right text-primary mx-2"></i>
+                    <strong>{{ search_params.diem_den }}</strong>
+                    {% if search_params.ngay_di %}
+                        - <span class="text-primary">{{ search_params.ngay_di }}</span>
+                    {% endif %}
+                    - {{ search_params.so_khach }} khách
+                </p>
+            </div>
+            <div class="col-lg-4 text-end">
+                <a href="{{ url_for('user.index') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i> Tìm kiếm mới
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search Results -->
+    {% if lich_trinh %}
+        <div class="search-results">
+            <div class="results-header mb-3">
+                <h5>Tìm thấy {{ lich_trinh|length }} chuyến xe</h5>
+            </div>
+            
+            {% for lt in lich_trinh %}
+            <div class="trip-card mb-3" data-trip-id="{{ lt.maLichTrinh }}">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <!-- Route & Time Info -->
+                            <div class="col-lg-4">
+                                <div class="trip-route">
+                                    <h6 class="route-name">{{ lt.tenTuyenDuong }}</h6>
+                                    <div class="route-details">
+                                        <span class="departure-time">{{ lt.gioDi }}</span>
+                                        <small class="text-muted">{{ lt.ngayDi.strftime('%d/%m/%Y') }}</small>
+                                    </div>
+                                    <div class="route-stations">
+                                        <small class="text-muted">
+                                            {{ lt.diemDi }} → {{ lt.diemDen }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Vehicle Info -->
+                            <div class="col-lg-3">
+                                <div class="vehicle-info">
+                                    <h6 class="vehicle-name">
+                                        <i class="bi bi-bus-front"></i>
+                                        {{ lt.xe_info.get('ten', 'N/A') }}
+                                    </h6>
+                                    <div class="vehicle-details">
+                                        <small class="text-muted">
+                                            Biển số: {{ lt.xe_info.get('bienSo', 'N/A') }}
+                                        </small><br>
+                                        <small class="text-muted">
+                                            Loại xe: {{ lt.xe_info.get('loaiXe', 'N/A') }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Availability & Status -->
+                            <div class="col-lg-2 text-center">
+                                <div class="availability-info">
+                                    <div class="seats-available">
+                                        <strong class="text-success">{{ lt.ghe_trong }}</strong>
+                                        <small class="text-muted d-block">chỗ trống</small>
+                                    </div>
+                                    <div class="trip-status mt-2">
+                                        <span class="badge bg-{{ 'success' if lt.tinhTrang == 'Sắp chạy' else 'primary' }}">
+                                            {{ lt.tinhTrang }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Price & Booking -->
+                            <div class="col-lg-3 text-end">
+                                <div class="price-booking">
+                                    <div class="price">
+                                        <span class="price-amount">
+                                            {{ "{:,.0f}".format(lt.gia_ve) }} VNĐ
+                                        </span>
+                                        <small class="text-muted d-block">/ khách</small>
+                                    </div>
+                                    
+                                    {% if lt.ghe_trong > 0 %}
+                                        <a href="{{ url_for('user.booking', lich_trinh_id=lt._id) }}" 
+                                           class="btn btn-primary btn-sm mt-2">
+                                            <i class="bi bi-ticket"></i> Đặt vé
+                                        </a>
+                                    {% else %}
+                                        <button class="btn btn-secondary btn-sm mt-2" disabled>
+                                            <i class="bi bi-x-circle"></i> Hết chỗ
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Trip Info -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="trip-extras">
+                                    <small class="text-muted">
+                                        {% if lt.tramDung %}
+                                            <i class="bi bi-geo-alt"></i> Trạm dừng: {{ lt.tramDung|join(', ') }}
+                                        {% endif %}
+                                        {% if lt.tenTaiXe %}
+                                            | <i class="bi bi-person"></i> Tài xế: {{ lt.tenTaiXe }}
+                                        {% endif %}
+                                        {% if lt.tenPhuXe %}
+                                            | Phụ xe: {{ lt.tenPhuXe }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <!-- No Results -->
+        <div class="no-results text-center py-5">
+            <div class="no-results-icon mb-3">
+                <i class="bi bi-search" style="font-size: 4rem; color: #ccc;"></i>
+            </div>
+            <h4>Không tìm thấy chuyến xe phù hợp</h4>
+            <p class="text-muted">
+                Không có chuyến xe nào từ <strong>{{ search_params.diem_di }}</strong> 
+                đến <strong>{{ search_params.diem_den }}</strong>
+                {% if search_params.ngay_di %}vào ngày {{ search_params.ngay_di }}{% endif %}.
+            </p>
+            <div class="suggestions mt-4">
+                <h6>Gợi ý:</h6>
+                <ul class="list-unstyled">
+                    <li>• Thử chọn ngày khác</li>
+                    <li>• Kiểm tra lại điểm đi và điểm đến</li>
+                    <li>• Tìm kiếm các tuyến đường gần đó</li>
+                </ul>
+            </div>
+            <a href="{{ url_for('user.index') }}" class="btn btn-primary mt-3">
+                <i class="bi bi-search"></i> Tìm kiếm lại
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+.trip-card {
+    transition: all 0.3s ease;
+}
+
+.trip-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.route-name {
+    color: #2c5aa0;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.departure-time {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.price-amount {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #e74c3c;
+}
+
+.seats-available strong {
+    font-size: 1.1rem;
+}
+
+.search-title {
+    color: #2c5aa0;
+    margin-bottom: 0.5rem;
+}
+
+.search-info {
+    margin-bottom: 0;
+    font-size: 1.1rem;
+}
+
+.vehicle-name {
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.trip-extras {
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+</style>
+{% endblock %}

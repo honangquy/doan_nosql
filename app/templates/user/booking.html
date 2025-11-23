@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+
+{% block styles %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/seat-map.css') }}">
+<style>
+:root {
+    --primary-color: #003b95;
+    --primary-dark: #002d75;
+    --accent-yellow: #ffd700;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --light-bg: #f8f9fa;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+}
+
+.trip-info {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 15px;
+    border-radius: 10px;
+}
+
+/* Sticky booking form CSS */
+.booking-form-wrapper {
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 40px);
+    overflow-y: auto;
+    z-index: 10;
+}
+
+/* Smooth scrolling */
+.booking-form-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.booking-form-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+.booking-form-wrapper::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.booking-form-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #a1a1a1;
+}
+
+/* Fix trip info positioning */
+.trip-info {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Selected seats display */
+.selected-seats-display {
+    max-height: 100px;
+    overflow-y: auto;
+    border: 1px solid #dee2e6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+    .booking-form-wrapper {
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+    }
+    
+    .booking-form-card {
+        max-height: none;
+    }
+    
+    .booking-form-card .card-body {
+        overflow-y: visible;
+    }
+}
+
+/* Fix button styling */
+#booking-submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+#booking-submit-btn {
+    transition: all 0.3s ease;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Page Header -->
+            <div class="text-center mb-4">
+                <h1 class="h2 text-primary-dark">
+                    <i class="bi bi-ticket-perforated"></i> Đặt Vé Xe Khách
+                </h1>
+                <p class="text-muted">Hoàn tất thông tin để đặt vé cho chuyến đi của bạn</p>
+            </div>
+
+            <!-- Trip Information Card -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="me-3">
+                                            <i class="bi bi-clock-fill text-success" style="font-size: 1.2rem;"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-0">{{ lich_trinh.gioDi or '21:32' }}</h5>
+                                            <small class="text-muted">{{ lich_trinh.thoiGianDi or '8 giờ' }}</small>
+                                        </div>
+                                        <div class="mx-4">
+                                            <i class="bi bi-arrow-right text-muted"></i>
+                                        </div>
+                                        <div class="me-3">
+                                            <i class="bi bi-geo-alt-fill text-danger" style="font-size: 1.2rem;"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-0">{{ lich_trinh.gioiDen or '05:32' }}</h5>
+                                            <small class="text-muted">{{ lich_trinh.ngayDen or lich_trinh.ngayDi }}</small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row g-3">
+                                        <div class="col-6">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-geo-fill text-primary me-2"></i>
+                                                <div>
+                                                    <div class="fw-semibold">{{ lich_trinh.diemDi or 'Bến xe An Sương' }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                                                <div>
+                                                    <div class="fw-semibold">{{ lich_trinh.diemDen or 'Bến Xe Đà Lạt' }}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-4 text-md-end">
+                                    <div class="mb-2">
+                                        <span class="badge bg-primary px-3 py-2">
+                                            {{ xe.ten or 'Limousine' }} • {{ available_seats or '22' }} chỗ trống
+                                        </span>
+                                    </div>
+                                    <h3 class="text-primary mb-0">
+                                        {{ "{:,.0f}".format(lich_trinh.giaVe or 290000) }}đ
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Seat Map -->
+                <div class="col-lg-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-gradient-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-grid-3x3-gap"></i> Sơ Đồ Ghế - {{ xe.bienSo }}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- New Seat Map Container -->
+                            <div id="seat-map-container">
+                                <div class="seat-map-loading text-center py-4">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Đang tải sơ đồ ghế...</span>
+                                    </div>
+                                    <div class="mt-2">Đang tải sơ đồ ghế...</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Booking Form -->
+                <div class="col-lg-4">
+                    <div class="booking-form-wrapper">
+                        <div class="card border-0 shadow-sm booking-form-card">
+                        <div class="card-header bg-gradient-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="bi bi-person-circle"></i> Thông Tin Đặt Vé
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form action="{{ url_for('user.confirm_booking') }}" method="POST">
+                                <input type="hidden" name="lich_trinh_id" value="{{ lich_trinh._id }}">
+                                <input type="hidden" name="selected_seats" id="selected-seats-input" required>
+                                <input type="hidden" name="base_price" value="{{ lich_trinh.giaVe or 0 }}" data-base-price="{{ lich_trinh.giaVe or 0 }}">
+                                
+                                <!-- Selected Seats -->
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">
+                                        <i class="bi bi-check-circle"></i> Ghế Đã Chọn (<span id="seat-count-display">0</span>/5):
+                                    </label>
+                                    <div class="selected-seats-display p-2 bg-light rounded" id="selected-seat-info" style="display: none;">
+                                        <div class="fw-semibold text-primary" id="selected-seat-number">Chưa chọn ghế</div>
+                                        <div id="selected-seat-details"></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Customer Information -->
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-person"></i> Họ và Tên
+                                    </label>
+                                    <input type="text" class="form-control" name="ho_ten" 
+                                           required placeholder="Nhập họ và tên đầy đủ">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-telephone"></i> Số Điện Thoại
+                                    </label>
+                                    <input type="tel" class="form-control" name="sdt" 
+                                           required placeholder="Nhập số điện thoại">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="bi bi-envelope"></i> Email
+                                    </label>
+                                    <input type="email" class="form-control" name="email"
+                                           placeholder="Nhập địa chỉ email">
+                                </div>
+                                
+                                <!-- Trip Summary -->
+                                <hr>
+                                <div class="trip-info mb-3">
+                                    <h6 class="text-primary-dark mb-2">Thông tin chuyến</h6>
+                                    {% if lich_trinh and lich_trinh.giaVe %}
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small class="text-muted">Giá vé (x<span id="ticket-quantity">0</span>):</small>
+                                        <small class="fw-semibold">{{ "{:,.0f}".format(lich_trinh.giaVe) }}đ</small>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small class="text-muted">Phí dịch vụ (x<span id="service-quantity">0</span>):</small>
+                                        <small class="fw-semibold">15,000đ</small>
+                                    </div>
+                                    <hr class="my-2">
+                                    <div class="d-flex justify-content-between">
+                                        <strong class="text-primary-dark">Tổng cộng:</strong>
+                                        <strong class="text-primary-dark" id="total-price-display">0đ</strong>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary w-100 btn-lg" id="booking-submit-btn" disabled>
+                                    <i class="bi bi-credit-card"></i> Chọn ghế để đặt vé
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- Support Card -->
+                    <div class="card border-0 shadow-sm mt-3">
+                        <div class="card-body text-center">
+                            <i class="bi bi-headset text-primary h3"></i>
+                            <h6 class="mt-2">Cần hỗ trợ?</h6>
+                            <p class="text-muted small mb-2">Liên hệ ngay để được tư vấn</p>
+                            <a href="tel:1900123456" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-telephone"></i> 1900 123 456
+                            </a>
+                        </div>
+                    </div>
+                    </div> <!-- Close booking-form-wrapper -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/seat-map.js') }}"></script>
+<script>
+let seatMap;
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize seat map
+    seatMap = window.initSeatMap('seat-map-container', '{{ lich_trinh._id }}');
+    
+    // Listen for seat selection
+    document.getElementById('seat-map-container').addEventListener('seatSelected', function(e) {
+        const selectedSeats = e.detail.selectedSeats || [];
+        const seatCount = e.detail.seatCount || 0;
+        
+        // Update quantity displays
+        document.getElementById('ticket-quantity').textContent = seatCount;
+        document.getElementById('service-quantity').textContent = seatCount;
+        document.getElementById('seat-count-display').textContent = seatCount;
+        
+        console.log('Selected seats:', selectedSeats);
+    });
+    
+    // Form validation
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const selectedSeats = document.getElementById('selected-seats-input').value;
+        if (!selectedSeats || selectedSeats.trim() === '') {
+            e.preventDefault();
+            alert('Vui lòng chọn ít nhất 1 ghế trước khi tiếp tục!');
+            return false;
+        }
+        
+        // Confirm booking with multiple seats
+        const seatArray = selectedSeats.split(',');
+        const confirmMsg = `Bạn có chắc chắn muốn đặt ${seatArray.length} vé cho các ghế: ${seatArray.join(', ')}?`;
+        if (!confirm(confirmMsg)) {
+            e.preventDefault();
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

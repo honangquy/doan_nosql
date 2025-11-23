@@ -1,0 +1,332 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Quản Lý Người Dùng - Quản lý xe khách{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col">
+                <h1 class="page-title">
+                    <i class="fas fa-users text-primary me-2"></i>
+                    Quản Lý Người Dùng
+                </h1>
+                <p class="page-subtitle">Quản lý thông tin tài khoản khách hàng</p>
+            </div>
+            <div class="col-auto">
+                <button type="button" class="btn btn-primary btn-action" data-bs-toggle="modal" data-bs-target="#addUserModal">
+                    <i class="fas fa-plus me-2"></i>
+                    Thêm người dùng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-primary">
+                <div class="stats-card-body">
+                    <div class="stats-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3 class="stats-number" data-stat="total_users">{{ total_users or 0 }}</h3>
+                        <p class="stats-label">Tổng người dùng</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-success">
+                <div class="stats-card-body">
+                    <div class="stats-icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3 class="stats-number" data-stat="active_users">{{ active_users or 0 }}</h3>
+                        <p class="stats-label">Đang hoạt động</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-warning">
+                <div class="stats-card-body">
+                    <div class="stats-icon">
+                        <i class="fas fa-user-clock"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3 class="stats-number" data-stat="new_today">{{ new_today or 0 }}</h3>
+                        <p class="stats-label">Đăng ký hôm nay</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="stats-card stats-card-info">
+                <div class="stats-card-body">
+                    <div class="stats-icon">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <div class="stats-content">
+                        <h3 class="stats-number" data-stat="total_bookings">{{ total_bookings or 0 }}</h3>
+                        <p class="stats-label">Tổng đặt vé</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table Card -->
+    <div class="table-card">
+        <div class="table-card-header">
+            <h5 class="table-card-title">
+                <i class="fas fa-table me-2"></i>
+                Danh sách người dùng
+            </h5>
+            <div class="table-card-actions">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" class="form-control table-search" placeholder="Tìm kiếm người dùng...">
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-filter me-2"></i>
+                        Lọc
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="filterUsers('all')">Tất cả</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterUsers('active')">Hoạt động</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="filterUsers('inactive')">Không hoạt động</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="exportUsers()">Xuất Excel</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th data-sortable="id">ID</th>
+                        <th data-sortable="username">Tên đăng nhập</th>
+                        <th data-sortable="email">Email</th>
+                        <th data-sortable="created_at">Ngày đăng ký</th>
+                        <th data-sortable="last_login">Đăng nhập cuối</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr data-id="{{ user._id }}">
+                        <td>
+                            <span class="badge bg-light text-dark">#{{ loop.index }}</span>
+                        </td>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    {{ user.ten[0].upper() if user.ten else 'U' }}
+                                </div>
+                                <div>
+                                    <strong>{{ user.ten }}</strong>
+                                    <small class="text-muted d-block">{{ user.maLoai or 'CSKH' }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <a href="mailto:{{ user.email }}" class="text-decoration-none">
+                                {{ user.email or 'Chưa cập nhật' }}
+                            </a>
+                        </td>
+                        <td>
+                            <span class="text-muted">{{ user.ngayThem.strftime('%d/%m/%Y') if user.ngayThem else 'N/A' }}</span>
+                        </td>
+                        <td>
+                            <span class="text-muted">{{ user.stt.strftime('%d/%m/%Y %H:%M') if user.stt else 'Chưa từng' }}</span>
+                        </td>
+                        <td>
+                            {% if user.tinhTrang == 'Hoạt động' %}
+                                <span class="badge bg-success">Hoạt động</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ user.tinhTrang or 'Không hoạt động' }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-outline-primary" data-action="view" title="Xem chi tiết">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" data-action="edit" title="Chỉnh sửa">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                {% if user.ten != 'admin' %}
+                                <button class="btn btn-sm btn-outline-danger" data-action="delete" title="Xóa">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="table-pagination">
+            <div class="pagination-info">
+                Hiển thị {{ users|length }} / {{ total_users or users|length }} người dùng
+            </div>
+            <nav>
+                <ul class="pagination pagination-sm">
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" tabindex="-1">Trước</a>
+                    </li>
+                    <li class="page-item active">
+                        <a class="page-link" href="#">1</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">2</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">3</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">Sau</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Thêm người dùng mới
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.admin_users') }}">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="username" class="form-label">Tên đăng nhập <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="password" class="form-label">Mật khẩu <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('password')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="confirm_password" class="form-label">Xác nhận mật khẩu <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="role" class="form-label">Vai trò</label>
+                            <select class="form-select" id="role" name="role">
+                                <option value="CSKH">Nhân viên CSKH</option>
+                                <option value="QLVH">Quản lý vận hành</option>
+                                <option value="QLKT">Quản lý kế toán</option>
+                                <option value="QLNS">Quản lý nhân sự</option>
+                                <option value="ADMIN">Quản trị viên</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="status" class="form-label">Trạng thái</label>
+                            <select class="form-select" id="status" name="is_active">
+                                <option value="1">Hoạt động</option>
+                                <option value="0">Không hoạt động</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="notes" class="form-label">Ghi chú</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" placeholder="Ghi chú về người dùng..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Lưu người dùng
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// User management specific functions
+function filterUsers(type) {
+    const rows = document.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+        const statusBadge = row.querySelector('.badge');
+        let show = true;
+        
+        if (type === 'active') {
+            show = statusBadge && statusBadge.textContent.includes('Hoạt động');
+        } else if (type === 'inactive') {
+            show = statusBadge && statusBadge.textContent.includes('Không hoạt động');
+        }
+        
+        row.style.display = show ? '' : 'none';
+    });
+    
+    DashStackAdmin.utils.showToast(`Đã lọc theo: ${type}`, 'info');
+}
+
+function exportUsers() {
+    DashStackAdmin.utils.showToast('Tính năng xuất Excel đang được phát triển', 'info');
+}
+
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const icon = field.nextElementSibling.querySelector('i');
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        field.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+
+// Form validation
+document.getElementById('addUserModal').addEventListener('shown.bs.modal', function() {
+    document.getElementById('username').focus();
+});
+
+// Password confirmation validation
+document.getElementById('confirm_password').addEventListener('input', function() {
+    const password = document.getElementById('password').value;
+    const confirmPassword = this.value;
+    
+    if (confirmPassword && password !== confirmPassword) {
+        this.setCustomValidity('Mật khẩu xác nhận không khớp');
+    } else {
+        this.setCustomValidity('');
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Tin Tức Mới Nhất</h2>
+<div class="row">
+    {% for tin in tin_tuc %}
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ tin.tieuDe }}</h5>
+                <p class="card-text text-muted">{{ tin.ngayThem }}</p>
+                <p class="card-text">{{ tin.noiDung[:100] }}...</p>
+                <a href="{{ url_for('user.news_detail', news_id=tin._id) }}" class="btn btn-primary">Đọc tiếp</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

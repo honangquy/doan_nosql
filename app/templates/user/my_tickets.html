@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+
+{% block title %}Vé đã đặt - XeKhach.com{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Profile Navigation Sidebar -->
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-person-circle"></i> Tài khoản của tôi
+                    </h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{{ url_for('user.profile') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-person"></i> Thông tin cá nhân
+                    </a>
+                    <a href="{{ url_for('user.my_tickets') }}" class="list-group-item list-group-item-action active">
+                        <i class="bi bi-ticket-perforated"></i> Vé đã đặt
+                    </a>
+                    <a href="{{ url_for('user.trip_history') }}" class="list-group-item list-group-item-action">
+                        <i class="bi bi-clock-history"></i> Lịch sử chuyến đi
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tickets Content -->
+        <div class="col-md-9">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="bi bi-ticket-perforated"></i> Vé đã đặt
+                    </h5>
+                    <span class="badge bg-primary">{{ tickets|length }} vé</span>
+                </div>
+                <div class="card-body">
+                    {% if tickets %}
+                        <div class="row">
+                            {% for ticket in tickets %}
+                            <div class="col-12">
+                                <div class="card mb-3 ticket-card">
+                                    <div class="card-body">
+                                        <div class="row align-items-center">
+                                            <!-- Trip Info -->
+                                            <div class="col-md-6">
+                                                <h6 class="trip-route">
+                                                    {% if ticket.lich_trinh %}
+                                                        {{ ticket.lich_trinh.get('diemDi', 'N/A') }} 
+                                                        <i class="bi bi-arrow-right text-primary mx-2"></i>
+                                                        {{ ticket.lich_trinh.get('diemDen', 'N/A') }}
+                                                    {% else %}
+                                                        Chuyến xe
+                                                    {% endif %}
+                                                </h6>
+                                                <div class="trip-details">
+                                                    {% if ticket.lich_trinh %}
+                                                        <p class="mb-1">
+                                                            <i class="bi bi-calendar3"></i>
+                                                            {{ ticket.lich_trinh.ngayDi.strftime('%d/%m/%Y') if ticket.lich_trinh.get('ngayDi') else 'N/A' }}
+                                                            -
+                                                            <i class="bi bi-clock"></i>
+                                                            {{ ticket.lich_trinh.get('gioDi', 'N/A') }}
+                                                        </p>
+                                                    {% endif %}
+                                                    <p class="mb-1">
+                                                        <i class="bi bi-geo-alt"></i>
+                                                        Ghế: <strong>{{ ticket.ghe_info.get('soGhe', ticket.get('maGhe', 'N/A')) }}</strong>
+                                                    </p>
+                                                    {% if ticket.xe_info %}
+                                                        <p class="mb-0">
+                                                            <i class="bi bi-bus-front"></i>
+                                                            {{ ticket.xe_info.get('ten', 'N/A') }} - 
+                                                            {{ ticket.xe_info.get('bienSo', 'N/A') }}
+                                                        </p>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Booking Info -->
+                                            <div class="col-md-3 text-center">
+                                                <div class="booking-info">
+                                                    {% if ticket.gia_ve_info %}
+                                                        <div class="price">
+                                                            <span class="h5 text-primary">
+                                                                {{ "{:,.0f}".format(ticket.gia_ve_info.get('giaVe', 0)) }} VNĐ
+                                                            </span>
+                                                        </div>
+                                                    {% endif %}
+                                                    <div class="booking-date">
+                                                        <small class="text-muted">
+                                                            Đặt ngày: {% if ticket.get('ngayThem') %}{{ ticket.ngayThem.strftime('%d/%m/%Y') }}{% elif ticket.get('ngayDat') %}{{ ticket.ngayDat.strftime('%d/%m/%Y') }}{% else %}N/A{% endif %}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Status & Actions -->
+                                            <div class="col-md-3 text-end">
+                                                <div class="ticket-status mb-2">
+                                                    {% set status = ticket.get('tinhTrang') or ticket.get('trangThai', 'Chưa xác định') %}
+                                                    {% if status == 'DaDat' %}{% set status = 'Đã đặt' %}{% endif %}
+                                                    {% if status == 'DaThanhToan' %}{% set status = 'Đã thanh toán' %}{% endif %}
+                                                    {% if status == 'Đã thanh toán' %}
+                                                        <span class="badge bg-success">{{ status }}</span>
+                                                    {% elif status == 'Chờ thanh toán' %}
+                                                        <span class="badge bg-warning">{{ status }}</span>
+                                                    {% elif status == 'Đã hủy' %}
+                                                        <span class="badge bg-danger">{{ status }}</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary">{{ status }}</span>
+                                                    {% endif %}
+                                                </div>
+                                                
+                                                <div class="ticket-actions">
+                                                    {% if status == 'Chờ thanh toán' %}
+                                                        <button class="btn btn-sm btn-primary mb-1">
+                                                            <i class="bi bi-credit-card"></i> Thanh toán
+                                                        </button>
+                                                    {% endif %}
+                                                    <button class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-eye"></i> Chi tiết
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Additional Info -->
+                                        <div class="row mt-2">
+                                            <div class="col-12">
+                                                <small class="text-muted">
+                                                    Mã vé: {{ ticket.get('maVe', ticket.get('_id', 'N/A')) }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Pagination if needed -->
+                        {% if tickets|length > 10 %}
+                        <nav aria-label="Ticket pagination">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item"><a class="page-link" href="#">Trước</a></li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item"><a class="page-link" href="#">Sau</a></li>
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="bi bi-ticket-perforated display-1 text-muted"></i>
+                            <h5 class="mt-3">Chưa có vé nào</h5>
+                            <p class="text-muted">Bạn chưa đặt vé nào. Hãy tìm kiếm và đặt chuyến đi đầu tiên!</p>
+                            <a href="{{ url_for('user.index') }}" class="btn btn-primary">
+                                <i class="bi bi-search"></i> Tìm chuyến xe
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.ticket-card {
+    border-left: 4px solid #0d6efd;
+    transition: transform 0.2s;
+}
+
+.ticket-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.trip-route {
+    color: #0d6efd;
+    font-weight: 600;
+}
+</style>
+{% endblock %}

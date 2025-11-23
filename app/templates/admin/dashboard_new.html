@@ -1,0 +1,469 @@
+{% extends 'admin/layout.html' %}
+
+{% block title %}Dashboard - Admin Panel{% endblock %}
+
+{% block page_title %}Dashboard - Tổng Quan Hệ Thống{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Dashboard</li>
+{% endblock %}
+
+{% block content %}
+<!-- Quick Stats Overview -->
+<div class="row g-4 mb-5">
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card modern-card">
+            <div class="stats-icon bg-primary-gradient">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="stats-content">
+                <h3 class="stats-number">{{ stats.total_customers or 0 }}</h3>
+                <p class="stats-label">Khách Hàng</p>
+                <div class="stats-change positive">
+                    <i class="bi bi-arrow-up"></i>
+                    <span>+12.5%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card modern-card">
+            <div class="stats-icon bg-success-gradient">
+                <i class="bi bi-ticket-perforated-fill"></i>
+            </div>
+            <div class="stats-content">
+                <h3 class="stats-number">{{ stats.total_bookings or 0 }}</h3>
+                <p class="stats-label">Đặt Vé Hôm Nay</p>
+                <div class="stats-change positive">
+                    <i class="bi bi-arrow-up"></i>
+                    <span>+8.2%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card modern-card">
+            <div class="stats-icon bg-warning-gradient">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="stats-content">
+                <h3 class="stats-number">{{ "%.1f"|format(stats.total_revenue/1000000) }}M</h3>
+                <p class="stats-label">Doanh Thu (VND)</p>
+                <div class="stats-change positive">
+                    <i class="bi bi-arrow-up"></i>
+                    <span>+15.3%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+        <div class="stats-card modern-card">
+            <div class="stats-icon bg-info-gradient">
+                <i class="bi bi-geo-alt-fill"></i>
+            </div>
+            <div class="stats-content">
+                <h3 class="stats-number">{{ stats.total_routes or 0 }}</h3>
+                <p class="stats-label">Tuyến Đường</p>
+                <div class="stats-change neutral">
+                    <i class="bi bi-dash"></i>
+                    <span>0%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard Content -->
+<div class="row g-4 mb-4">
+    <!-- Revenue Chart -->
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title">
+                    <i class="bi bi-graph-up text-primary me-2"></i>
+                    Doanh Thu 7 Ngày Gần Đây
+                </h5>
+                <div class="card-actions">
+                    <button class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-download me-1"></i>Export
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="col-lg-4">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="bi bi-lightning-fill text-warning me-2"></i>
+                    Thao Tác Nhanh
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="quick-actions">
+                    <a href="{{ url_for('admin.list_items', collection_name='XeKhach') }}" class="quick-action-btn">
+                        <div class="action-icon bg-primary">
+                            <i class="bi bi-bus-front"></i>
+                        </div>
+                        <div class="action-content">
+                            <span class="action-title">Quản Lý Xe</span>
+                            <span class="action-desc">Thêm, sửa xe khách</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    
+                    <a href="{{ url_for('admin.admin_routes') }}" class="quick-action-btn">
+                        <div class="action-icon bg-success">
+                            <i class="bi bi-signpost-2"></i>
+                        </div>
+                        <div class="action-content">
+                            <span class="action-title">Tuyến Đường</span>
+                            <span class="action-desc">Quản lý các tuyến</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    
+                    <a href="{{ url_for('admin.list_items', collection_name='VeXe') }}" class="quick-action-btn">
+                        <div class="action-icon bg-warning">
+                            <i class="bi bi-ticket"></i>
+                        </div>
+                        <div class="action-content">
+                            <span class="action-title">Đặt Vé</span>
+                            <span class="action-desc">Xem đơn đặt vé</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    
+                    <a href="{{ url_for('admin.create_trip') }}" class="quick-action-btn">
+                        <div class="action-icon bg-info">
+                            <i class="bi bi-calendar-event"></i>
+                        </div>
+                        <div class="action-content">
+                            <span class="action-title">Tạo Chuyến Xe</span>
+                            <span class="action-desc">Lập lịch trình mới</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    
+                    <a href="{{ url_for('admin.list_items', collection_name='GiaVe') }}" class="quick-action-btn">
+                        <div class="action-icon bg-danger">
+                            <i class="bi bi-currency-dollar"></i>
+                        </div>
+                        <div class="action-content">
+                            <span class="action-title">Giá Vé</span>
+                            <span class="action-desc">Quản lý giá vé</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                    
+                    <a href="{{ url_for('admin.admin_users') }}" class="quick-action-btn">
+                        <div class="action-icon bg-info">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="action-content">
+                            <span class="action-title">Khách Hàng</span>
+                            <span class="action-desc">Quản lý users</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities & System Status -->
+<div class="row g-4 mb-4">
+    <!-- Recent Bookings -->
+    <div class="col-lg-6">
+        <div class="dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title">
+                    <i class="bi bi-clock-history text-success me-2"></i>
+                    Đặt Vé Gần Đây
+                </h5>
+                <a href="{{ url_for('admin.list_items', collection_name='VeXe') }}" class="btn btn-outline-success btn-sm">
+                    Xem Tất Cả
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="recent-activities">
+                    {% for booking in recent_bookings %}
+                    <div class="activity-item">
+                        <div class="activity-icon bg-success-light">
+                            <i class="bi bi-ticket text-success"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h6 class="activity-title">Vé #{{ booking.maVe or booking._id }}</h6>
+                            <p class="activity-desc">Khách hàng: {{ booking.tenKhach or 'N/A' }}</p>
+                            <span class="activity-time">{{ booking.ngayDat or 'Hôm nay' }}</span>
+                        </div>
+                        <span class="activity-badge bg-success">Mới</span>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <i class="bi bi-inbox"></i>
+                        <p>Chưa có đặt vé nào gần đây</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- System Status -->
+    <div class="col-lg-6">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="bi bi-speedometer2 text-info me-2"></i>
+                    Trạng Thái Hệ Thống
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="system-status">
+                    <div class="status-item">
+                        <div class="status-label">
+                            <i class="bi bi-database text-success me-2"></i>
+                            Database
+                        </div>
+                        <span class="status-badge bg-success">Online</span>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-label">
+                            <i class="bi bi-server text-success me-2"></i>
+                            Server
+                        </div>
+                        <span class="status-badge bg-success">Healthy</span>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-label">
+                            <i class="bi bi-wifi text-success me-2"></i>
+                            API Services
+                        </div>
+                        <span class="status-badge bg-success">Active</span>
+                    </div>
+                    
+                    <div class="status-item">
+                        <div class="status-label">
+                            <i class="bi bi-shield-check text-warning me-2"></i>
+                            Backup
+                        </div>
+                        <span class="status-badge bg-warning">Scheduled</span>
+                    </div>
+                </div>
+                
+                <!-- Performance Metrics -->
+                <div class="performance-metrics mt-4">
+                    <h6 class="mb-3">Hiệu Suất Hệ Thống</h6>
+                    <div class="metric-item">
+                        <div class="metric-info">
+                            <span class="metric-label">CPU Usage</span>
+                            <span class="metric-value">45%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-primary" style="width: 45%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-item">
+                        <div class="metric-info">
+                            <span class="metric-label">Memory</span>
+                            <span class="metric-value">62%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning" style="width: 62%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-item">
+                        <div class="metric-info">
+                            <span class="metric-label">Storage</span>
+                            <span class="metric-value">78%</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" style="width: 78%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Popular Routes & News -->
+<div class="row g-4">
+    <!-- Popular Routes -->
+    <div class="col-lg-7">
+        <div class="dashboard-card">
+            <div class="card-header">
+                <h5 class="card-title">
+                    <i class="bi bi-star-fill text-warning me-2"></i>
+                    Tuyến Đường Phổ Biến
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="popular-routes">
+                    <div class="route-item">
+                        <div class="route-info">
+                            <h6 class="route-name">TP.HCM ⇄ Đà Lạt</h6>
+                            <p class="route-stats">156 lượt đặt tuần này • 4.8⭐</p>
+                        </div>
+                        <div class="route-revenue">
+                            <span class="revenue-amount">45.2M VND</span>
+                            <span class="revenue-change text-success">+12%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="route-item">
+                        <div class="route-info">
+                            <h6 class="route-name">TP.HCM ⇄ Nha Trang</h6>
+                            <p class="route-stats">124 lượt đặt tuần này • 4.7⭐</p>
+                        </div>
+                        <div class="route-revenue">
+                            <span class="revenue-amount">38.1M VND</span>
+                            <span class="revenue-change text-success">+8%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="route-item">
+                        <div class="route-info">
+                            <h6 class="route-name">Hà Nội ⇄ Hải Phòng</h6>
+                            <p class="route-stats">98 lượt đặt tuần này • 4.6⭐</p>
+                        </div>
+                        <div class="route-revenue">
+                            <span class="revenue-amount">22.8M VND</span>
+                            <span class="revenue-change text-danger">-2%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent News -->
+    <div class="col-lg-5">
+        <div class="dashboard-card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title">
+                    <i class="bi bi-newspaper text-primary me-2"></i>
+                    Tin Tức & Thông Báo
+                </h5>
+                <a href="{{ url_for('admin.list_items', collection_name='TinTuc') }}" class="btn btn-outline-primary btn-sm">
+                    Quản Lý
+                </a>
+            </div>
+            <div class="card-body">
+                <div class="news-list">
+                    <div class="news-item">
+                        <div class="news-content">
+                            <h6 class="news-title">Khuyến mãi 30/4 - Giảm 30%</h6>
+                            <p class="news-excerpt">Chương trình giảm giá đặc biệt dịp lễ...</p>
+                            <span class="news-date">2 giờ trước</span>
+                        </div>
+                        <span class="news-status bg-success">Đã đăng</span>
+                    </div>
+                    
+                    <div class="news-item">
+                        <div class="news-content">
+                            <h6 class="news-title">Cập nhật lịch trình mùa hè</h6>
+                            <p class="news-excerpt">Thêm nhiều chuyến xe phục vụ cao điểm...</p>
+                            <span class="news-date">1 ngày trước</span>
+                        </div>
+                        <span class="news-status bg-warning">Draft</span>
+                    </div>
+                    
+                    <div class="news-item">
+                        <div class="news-content">
+                            <h6 class="news-title">Bảo trì hệ thống</h6>
+                            <p class="news-excerpt">Thông báo bảo trì hệ thống cuối tuần...</p>
+                            <span class="news-date">3 ngày trước</span>
+                        </div>
+                        <span class="news-status bg-info">Scheduled</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Revenue Chart
+const ctx = document.getElementById('revenueChart').getContext('2d');
+const revenueChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'],
+        datasets: [{
+            label: 'Doanh Thu (VND)',
+            data: [12000000, 19000000, 15000000, 25000000, 22000000, 30000000, 28000000],
+            borderColor: '#4B7BEC',
+            backgroundColor: 'rgba(75, 123, 236, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: '#4B7BEC',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                grid: {
+                    color: 'rgba(0,0,0,0.1)',
+                },
+                ticks: {
+                    callback: function(value, index, values) {
+                        return (value / 1000000) + 'M';
+                    }
+                }
+            },
+            x: {
+                grid: {
+                    display: false,
+                }
+            }
+        },
+        elements: {
+            point: {
+                hoverRadius: 8,
+            }
+        }
+    }
+});
+
+// Auto refresh stats every 30 seconds
+setInterval(function() {
+    fetch('/admin/api/stats')
+        .then(response => response.json())
+        .then(data => {
+            // Update stats numbers here if needed
+            console.log('Stats updated:', data);
+        })
+        .catch(err => console.error('Failed to update stats:', err));
+}, 30000);
+</script>
+{% endblock %}

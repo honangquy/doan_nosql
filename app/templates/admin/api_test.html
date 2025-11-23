@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test Page</title>
+    <script>
+        function testRouteAPI() {
+            const routeId = document.getElementById('routeId').value || 'AG-CM';
+            const output = document.getElementById('output');
+            
+            output.innerHTML = '<p>🔄 Testing API...</p>';
+            
+            fetch(`/admin/api/route-info/${routeId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin'  // Include session cookies
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Content-Type:', response.headers.get('content-type'));
+                
+                return response.text().then(text => {
+                    try {
+                        const data = JSON.parse(text);
+                        return { json: data, text: text, ok: response.ok };
+                    } catch (e) {
+                        return { json: null, text: text, ok: response.ok, error: e.message };
+                    }
+                });
+            })
+            .then(result => {
+                if (result.json) {
+                    output.innerHTML = `
+                        <h3>✅ SUCCESS - Valid JSON Response</h3>
+                        <pre>${JSON.stringify(result.json, null, 2)}</pre>
+                    `;
+                } else {
+                    output.innerHTML = `
+                        <h3>❌ ERROR - Invalid JSON Response</h3>
+                        <p><strong>Parse Error:</strong> ${result.error || 'Unknown'}</p>
+                        <p><strong>Raw Response:</strong></p>
+                        <pre>${result.text}</pre>
+                    `;
+                }
+            })
+            .catch(error => {
+                output.innerHTML = `
+                    <h3>❌ NETWORK ERROR</h3>
+                    <p>${error.message}</p>
+                `;
+            });
+        }
+        
+        function checkAuthStatus() {
+            fetch('/admin/dashboard', {
+                method: 'GET',
+                credentials: 'same-origin'
+            })
+            .then(response => {
+                const authStatus = document.getElementById('authStatus');
+                if (response.ok) {
+                    authStatus.innerHTML = '✅ Authenticated as Admin';
+                    authStatus.style.color = 'green';
+                } else if (response.status === 302) {
+                    authStatus.innerHTML = '❌ Not authenticated (redirected to login)';
+                    authStatus.style.color = 'red';
+                } else {
+                    authStatus.innerHTML = `⚠️ Unknown status: ${response.status}`;
+                    authStatus.style.color = 'orange';
+                }
+            })
+            .catch(error => {
+                document.getElementById('authStatus').innerHTML = `❌ Error: ${error.message}`;
+            });
+        }
+        
+        // Check auth on page load
+        window.onload = function() {
+            checkAuthStatus();
+        };
+    </script>
+</head>
+<body>
+    <h1>🧪 API Test Page</h1>
+    
+    <div style="margin: 20px 0; padding: 10px; border: 1px solid #ddd;">
+        <h3>Authentication Status</h3>
+        <p id="authStatus">🔄 Checking...</p>
+        <button onclick="checkAuthStatus()">Refresh Auth Status</button>
+    </div>
+    
+    <div style="margin: 20px 0; padding: 10px; border: 1px solid #ddd;">
+        <h3>Test Route API</h3>
+        <p>
+            <label>Route ID: </label>
+            <input type="text" id="routeId" value="AG-CM" placeholder="Enter route ID">
+            <button onclick="testRouteAPI()">Test API</button>
+        </p>
+        
+        <div id="output" style="margin-top: 20px; padding: 10px; background: #f9f9f9; border: 1px solid #ccc;">
+            Click "Test API" to see results...
+        </div>
+    </div>
+    
+    <div style="margin: 20px 0; padding: 10px; border: 1px solid #ddd;">
+        <h3>Instructions</h3>
+        <ol>
+            <li>Make sure you're logged in as admin in this browser</li>
+            <li>Check authentication status above</li>
+            <li>If not authenticated, <a href="/admin/dashboard" target="_blank">login here</a></li>
+            <li>Come back and test the API</li>
+        </ol>
+    </div>
+</body>
+</html>
