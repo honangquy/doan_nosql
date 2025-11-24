@@ -55,6 +55,18 @@ doan_nosql/
 ├── 📄 create_admin.py        # Tạo tài khoản admin
 └── 📄 create_user_demo.py    # Tạo dữ liệu demo
 ```
+### Giao diện hệ trang chủ
+<img width="1900" height="904" alt="image" src="https://github.com/user-attachments/assets/afee75bf-4e78-4d8b-8d89-78773b657b76" />
+### Giao diện xem tuyến đường
+<img width="1899" height="907" alt="image" src="https://github.com/user-attachments/assets/5663fa4e-d4a8-4eff-832d-7eef7504e0c5" />
+### Giao diện admin dashboard
+<img width="1900" height="907" alt="image" src="https://github.com/user-attachments/assets/4623470a-f36c-45de-9965-cc47f0848575" />
+### Giao diện thống kê
+<img width="1901" height="908" alt="image" src="https://github.com/user-attachments/assets/2bd7bbfa-f641-408b-843d-73e5ef077388" />
+### Giao diện doanh thu
+<img width="1900" height="908" alt="image" src="https://github.com/user-attachments/assets/77db732b-5b8e-40a7-9471-1a6408e5c426" />
+### Giao diện đặt vé
+<img width="1902" height="910" alt="image" src="https://github.com/user-attachments/assets/dbb8a041-9a08-450b-b100-6475831649d2" />
 
 ## 🚀 Cài Đặt và Chạy
 
