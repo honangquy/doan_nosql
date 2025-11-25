@@ -79,15 +79,22 @@ def register():
             return render_template('auth/register.html')
         
         # Tạo mã khách hàng mới
-        last_customer = mongo.db.KhachHang.find().sort('maKhach', -1).limit(1)
-        last_customer_list = list(last_customer)
-        if last_customer_list:
-            last_ma = last_customer_list[0]['maKhach']
-            # Extract number from KH0001 format
-            last_num = int(last_ma[2:])  # Remove 'KH' prefix
-            new_num = last_num + 1
+        last_customer = mongo.db.KhachHang.find_one(
+            {'maKhach': {'$regex': '^KH[0-9]+$'}},
+            sort=[('maKhach', -1)]
+        )
+        
+        if last_customer and last_customer.get('maKhach'):
+            try:
+                # Extract number from KH0001 format
+                last_num = int(last_customer['maKhach'].replace('KH', ''))
+                new_num = last_num + 1
+            except (ValueError, TypeError):
+                # Fallback if parsing fails
+                new_num = mongo.db.KhachHang.count_documents({}) + 1
         else:
             new_num = 1
+            
         new_ma_khach = f'KH{new_num:04d}'  # Format as KH0001
         
         # Create new customer - lưu vào bảng KhachHang

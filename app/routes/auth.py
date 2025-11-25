@@ -41,44 +41,73 @@ def login():
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form.get('username')
+        ho_ten = request.form.get('ho_ten')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
-        ho_ten = request.form.get('ho_ten')
         email = request.form.get('email')
         sdt = request.form.get('sdt')
+        dia_chi = request.form.get('dia_chi', '')
         
         # Validate
+        if not ho_ten or not password or not sdt:
+            flash('Vui lòng điền đầy đủ thông tin bắt buộc (Họ tên, Mật khẩu, Số điện thoại)')
+            return render_template('auth/register.html')
+            
         if password != confirm_password:
             flash('Mật khẩu xác nhận không khớp')
             return render_template('auth/register.html')
             
-        # Check if username exists - sử dụng đúng tên trường
-        existing_user = mongo.db.TaiKhoan.find_one({'ten': username})
-        if existing_user:
-            flash('Tên đăng nhập đã tồn tại')
+        # Check if phone number exists
+        existing_customer = mongo.db.KhachHang.find_one({'dienThoai': sdt})
+        if existing_customer:
+            flash('Số điện thoại đã được đăng ký')
             return render_template('auth/register.html')
         
-        # Create new user - sử dụng đúng schema database
-        user_data = {
-            'ten': username,  # Sử dụng 'ten' thay vì 'username'
-            'matKhau': password,  # Sử dụng 'matKhau' thay vì 'password'
-            'maLoai': 'USER',  # Sử dụng 'maLoai' thay vì 'role'
-            'hoTen': ho_ten,
-            'email': email,
-            'soDienThoai': sdt,
-            'ngayThem': datetime.now(),
-            'trangThai': 'active'
+        # Check if email exists (if provided)
+        if email:
+            existing_email = mongo.db.KhachHang.find_one({'email': email})
+            if existing_email:
+                flash('Email đã được đăng ký')
+                return render_template('auth/register.html')
+        
+        # Generate new customer code
+        last_customer = mongo.db.KhachHang.find_one(
+            {'maKhach': {'$regex': '^KH[0-9]+$'}},
+            sort=[('maKhach', -1)]
+        )
+        
+        if last_customer and last_customer.get('maKhach'):
+            try:
+                last_num = int(last_customer['maKhach'].replace('KH', ''))
+                new_code = f'KH{str(last_num + 1).zfill(4)}'
+            except (ValueError, TypeError):
+                # Fallback if parsing fails
+                new_code = f'KH{str(mongo.db.KhachHang.count_documents({}) + 1).zfill(4)}'
+        else:
+            new_code = 'KH0001'
+        
+        # Create new customer account - đúng cấu trúc KhachHang
+        customer_data = {
+            'maKhach': new_code,
+            'ten': ho_ten,
+            'dienThoai': sdt,
+            'email': email if email else '',
+            'diaChi': dia_chi,
+            'soCmnd': '',
+            'moTa': 'Khách hàng đăng ký online',
+            'matKhau': password,
+            'ngayThem': datetime.now()
         }
         
-        result = mongo.db.TaiKhoan.insert_one(user_data)
+        result = mongo.db.KhachHang.insert_one(customer_data)
         
         # Auto login after registration
-        session['user_id'] = str(result.inserted_id)
-        session['role'] = 'USER'
-        session['username'] = username
+        session['customer_id'] = str(result.inserted_id)
+        session['customer_code'] = new_code
+        session['customer_name'] = ho_ten
+        session['role'] = 'CUSTOMER'
         
-        flash('Đăng ký thành công!')
+        flash('Đăng ký thành công!', 'success')
         return redirect(url_for('user.index'))
         
     return render_template('auth/register.html')

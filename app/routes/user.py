@@ -39,112 +39,86 @@ def get_available_dates():
         diem_di = request.args.get('diem_di') or request.args.get('from_location')
         diem_den = request.args.get('diem_den') or request.args.get('to_location')
         
+        today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        
         # Nếu có specific route request
         if diem_di and diem_den:
-            # Tìm tuyến đường phù hợp
-            tuyen_query = {
+            # Tìm tuyến đường phù hợp - hỗ trợ cả mã điểm và tên thành phố
+            tuyen_duong = mongo.db.TuyenDuong.find_one({
                 '$or': [
                     {'diemDau': diem_di, 'diemCuoi': diem_den},
-                    {'maTuyenDuong': f'{diem_di}-{diem_den}'}
+                    {'diemDau': diem_den, 'diemCuoi': diem_di},
+                    {'tenTuyenDuong': {'$regex': diem_di, '$options': 'i'}},
+                    {'tenTuyenDuong': {'$regex': diem_den, '$options': 'i'}}
                 ]
-            }
-            tuyen_duong = mongo.db.TuyenDuong.find_one(tuyen_query)
-            
-            if not tuyen_duong:
-                return jsonify({'dates': [], 'message': 'Không tìm thấy tuyến đường'})
-                
-            # Tìm lịch trình có điểm đi/đến phù hợp
-            lich_trinh_query = {
-                '$or': [
-                    {'diemDi': tuyen_duong.get('diemDau'), 'diemDen': tuyen_duong.get('diemCuoi')},
-                    {'diemDi': diem_di, 'diemDen': diem_den}
-                ],
-                'tinhTrang': {'$in': ['Sắp chạy', 'Đang chạy']},
-                'ngayDi': {'$gte': datetime.now()}
-            }
-            
-            lich_trinh_list = list(mongo.db.LichTrinh.find(lich_trinh_query))
-            
-            # Tìm giá vé cho tuyến này
-            gia_ve = mongo.db.GiaVe.find_one({
-                'tuyen': tuyen_duong.get('maTuyenDuong'),
-                'tinhTrang': 'Hoạt động'
             })
             
-            base_price = gia_ve.get('giaVe', 0) if gia_ve else 0
+            # Tìm lịch trình - đơn giản hóa query
+            lich_trinh_query = {
+                'ngayDi': {'$gte': today},
+                'tinhTrang': {'$in': ['Sắp chạy', 'Đang chạy', 'Chưa khởi hành', 'Đang chờ']}
+            }
             
-            # Format dữ liệu cho Flatpickr
-            available_dates = []
+            # Match điểm đi/đến
+            if tuyen_duong:
+                lich_trinh_query['$or'] = [
+                    {'diemDi': tuyen_duong.get('diemDau'), 'diemDen': tuyen_duong.get('diemCuoi')},
+                    {'diemDi': tuyen_duong.get('diemCuoi'), 'diemDen': tuyen_duong.get('diemDau')},
+                    {'diemDi': diem_di, 'diemDen': diem_den},
+                    {'diemDi': diem_den, 'diemDen': diem_di}
+                ]
+            else:
+                lich_trinh_query['$or'] = [
+                    {'diemDi': diem_di, 'diemDen': diem_den},
+                    {'diemDi': diem_den, 'diemDen': diem_di},
+                    {'diemDi': {'$regex': diem_di, '$options': 'i'}, 'diemDen': {'$regex': diem_den, '$options': 'i'}},
+                    {'diemDi': {'$regex': diem_den, '$options': 'i'}, 'diemDen': {'$regex': diem_di, '$options': 'i'}}
+                ]
+            
+            lich_trinh_list = list(mongo.db.LichTrinh.find(lich_trinh_query).sort('ngayDi', 1))
+            
+            # Tìm giá vé
+            gia_ve = mongo.db.GiaVe.find_one({
+                'tinhTrang': {'$in': ['Hoạt động', 'Đang áp dụng']}
+            })
+            base_price = gia_ve.get('giaVe', 350000) if gia_ve else 350000
+            
+            # Format dữ liệu cho Flatpickr - group by date
+            dates_dict = {}
             for lt in lich_trinh_list:
                 date_str = lt['ngayDi'].strftime('%Y-%m-%d')
-                available_dates.append({
-                    'date': date_str,
-                    'price': base_price,
+                if date_str not in dates_dict:
+                    dates_dict[date_str] = {
+                        'date': date_str,
+                        'price': base_price,
+                        'trips': []
+                    }
+                dates_dict[date_str]['trips'].append({
                     'time': lt.get('gioDi', ''),
                     'trip_id': lt.get('maLichTrinh'),
                     'status': lt.get('tinhTrang')
                 })
-                
+            
+            available_dates = list(dates_dict.values())
+            
             return jsonify({
                 'dates': available_dates,
-                'route': tuyen_duong.get('tenTuyenDuong'),
-                'base_price': base_price
+                'route': tuyen_duong.get('tenTuyenDuong') if tuyen_duong else f"{diem_di} → {diem_den}",
+                'base_price': base_price,
+                'total_trips': len(lich_trinh_list)
             })
             
         else:
-            # Return all available routes with dates and prices
-            routes_data = []
-            
-            # Get all active trips in future với logic trạng thái chính xác
-            current_time = datetime.now()
-            today = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
-            
-            lich_trinh_list = list(mongo.db.LichTrinh.find({
-                '$and': [
-                    {'ngayDi': {'$gte': today}},
-                    {'$or': [
-                        {'ngayDi': {'$gte': today, '$lt': today + timedelta(days=1)}, 'tinhTrang': 'Đang chạy'},
-                        {'ngayDi': {'$gte': today + timedelta(days=1)}, 'tinhTrang': 'Sắp chạy'}
-                    ]}
-                ]
-            }))
-            
-            # Group by route
-            route_map = {}
-            for lt in lich_trinh_list:
-                route_key = f"{lt.get('diemDi')}-{lt.get('diemDen')}"
-                date_str = lt['ngayDi'].strftime('%Y-%m-%d')
-                
-                if route_key not in route_map:
-                    # Find price for this route
-                    gia_ve = mongo.db.GiaVe.find_one({
-                        '$or': [
-                            {'tuyen': route_key},
-                            {'maTuyenDuong': route_key}
-                        ]
-                    })
-                    price = gia_ve.get('giaVe', 180000) if gia_ve else 180000
-                    
-                    route_map[route_key] = {
-                        'from': lt.get('diemDi'),
-                        'to': lt.get('diemDen'), 
-                        'price': price,
-                        'dates': []
-                    }
-                
-                route_map[route_key]['dates'].append(date_str)
-            
-            # Convert to list format
-            for route_info in route_map.values():
-                route_info['dates'] = sorted(list(set(route_info['dates'])))  # Remove duplicates and sort
-                routes_data.append(route_info)
-            
+            # Return all available routes - không cần specific route
             return jsonify({
                 'status': 'success',
-                'routes': routes_data
+                'message': 'Please provide diem_di and diem_den parameters'
             })
         
     except Exception as e:
+        print(f"Error in available-dates API: {e}")
+        import traceback
+        traceback.print_exc()
         return jsonify({'error': str(e)}), 500
 
 @user_bp.route('/search')
@@ -157,53 +131,64 @@ def search():
     if not diem_di or not diem_den:
         flash('Vui lòng chọn điểm đi và điểm đến')
         return redirect(url_for('user.index'))
-        
-    # Build search query với logic đúng - chỉ lấy chuyến khả dụng
+    
+    # Build search query - đơn giản hóa
     current_time = datetime.now()
     today = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
     
+    # Base query - tìm theo điểm và trạng thái khả dụng
     query = {
-        '$and': [
-            # Chỉ lấy chuyến từ hôm nay trở đi
-            {'ngayDi': {'$gte': today}},
-            # Trạng thái phù hợp theo ngày
-            {'$or': [
-                {'ngayDi': {'$gte': today, '$lt': today + timedelta(days=1)}, 'tinhTrang': 'Đang chạy'},
-                {'ngayDi': {'$gte': today + timedelta(days=1)}, 'tinhTrang': 'Sắp chạy'}
-            ]}
-        ]
+        'ngayDi': {'$gte': today},
+        'tinhTrang': {'$in': ['Sắp chạy', 'Đang chạy', 'Chưa khởi hành', 'Đang chờ']}
     }
     
-    # Tìm theo tuyến đường trước
-    tuyen_query = {
+    # Tìm theo tuyến đường - hỗ trợ cả mã điểm và tên thành phố
+    tuyen_duong = mongo.db.TuyenDuong.find_one({
         '$or': [
             {'diemDau': diem_di, 'diemCuoi': diem_den},
-            {'maTuyenDuong': f'{diem_di}-{diem_den}'}
+            {'diemDau': diem_den, 'diemCuoi': diem_di},
+            {'tenTuyenDuong': {'$regex': diem_di, '$options': 'i'}},
+            {'tenTuyenDuong': {'$regex': diem_den, '$options': 'i'}}
         ]
-    }
-    tuyen_duong = mongo.db.TuyenDuong.find_one(tuyen_query)
+    })
     
+    # Match điểm đi/đến - hỗ trợ cả chiều đi và chiều về
     if tuyen_duong:
         query['$or'] = [
             {'diemDi': tuyen_duong.get('diemDau'), 'diemDen': tuyen_duong.get('diemCuoi')},
-            {'diemDi': diem_di, 'diemDen': diem_den}
+            {'diemDi': tuyen_duong.get('diemCuoi'), 'diemDen': tuyen_duong.get('diemDau')},
+            {'diemDi': diem_di, 'diemDen': diem_den},
+            {'diemDi': diem_den, 'diemDen': diem_di}
         ]
     else:
-        query['diemDi'] = diem_di
-        query['diemDen'] = diem_den
+        # Không tìm thấy trong TuyenDuong, search trực tiếp
+        query['$or'] = [
+            {'diemDi': diem_di, 'diemDen': diem_den},
+            {'diemDi': diem_den, 'diemDen': diem_di},
+            # Hỗ trợ tìm theo tên thành phố
+            {'diemDi': {'$regex': diem_di, '$options': 'i'}, 'diemDen': {'$regex': diem_den, '$options': 'i'}},
+            {'diemDi': {'$regex': diem_den, '$options': 'i'}, 'diemDen': {'$regex': diem_di, '$options': 'i'}}
+        ]
     
     # Filter theo ngày nếu có
     if ngay_di:
         try:
             ngay_obj = datetime.strptime(ngay_di, '%Y-%m-%d')
+            ngay_end = ngay_obj.replace(hour=23, minute=59, second=59)
             query['ngayDi'] = {
                 '$gte': ngay_obj,
-                '$lt': ngay_obj.replace(hour=23, minute=59, second=59)
+                '$lte': ngay_end
             }
         except:
             pass
-            
+    
+    # Execute query
     lich_trinh = list(mongo.db.LichTrinh.find(query).sort('ngayDi', 1))
+    
+    # Debug log
+    print(f"DEBUG Search: {diem_di} → {diem_den}, found {len(lich_trinh)} trips")
+    if tuyen_duong:
+        print(f"  Matched route: {tuyen_duong.get('tenTuyenDuong')}")
     
     # Enrich data với thông tin xe và giá vé
     for lt in lich_trinh:
@@ -696,71 +681,81 @@ def confirm_booking():
 def routes():
     """Hiển thị tất cả tuyến đường và chuyến xe khả dụng"""
     try:
-        # Lấy tất cả tuyến đường
-        tuyen_duong = list(mongo.db.TuyenDuong.find({}).sort('tenTuyenDuong', 1))
+        current_time = datetime.now()
+        today = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
         
-        routes_with_trips = []
-        for tuyen in tuyen_duong:
-            # Tìm các chuyến xe cho tuyến này - chỉ lấy chuyến khả dụng
-            current_time = datetime.now()
-            today = current_time.replace(hour=0, minute=0, second=0, microsecond=0)
+        # Lấy tất cả chuyến xe khả dụng
+        available_trips = list(mongo.db.LichTrinh.find({
+            'ngayDi': {'$gte': today},
+            'tinhTrang': {'$in': ['Sắp chạy', 'Đang chạy', 'Chưa khởi hành', 'Đang chờ']}
+        }).sort('ngayDi', 1))
+        
+        # Nhóm trips theo tuyến đường (diemDi → diemDen)
+        routes_dict = {}
+        
+        for trip in available_trips:
+            diem_di = trip.get('diemDi', '')
+            diem_den = trip.get('diemDen', '')
+            route_key = f"{diem_di}_{diem_den}"
             
-            trips_query = {
-                '$or': [
-                    {'diemDi': tuyen.get('diemDau'), 'diemDen': tuyen.get('diemCuoi')},
-                    {'diemDi': tuyen.get('diemCuoi'), 'diemDen': tuyen.get('diemDau')}  # Chiều ngược lại
-                ],
-                '$and': [
-                    # Chỉ lấy chuyến từ hôm nay trở đi
-                    {'ngayDi': {'$gte': today}},
-                    # Trạng thái phù hợp: hôm nay là 'Đang chạy', tương lai là 'Sắp chạy'
-                    {'$or': [
-                        {'ngayDi': {'$gte': today, '$lt': today + timedelta(days=1)}, 'tinhTrang': 'Đang chạy'},
-                        {'ngayDi': {'$gte': today + timedelta(days=1)}, 'tinhTrang': 'Sắp chạy'}
-                    ]}
-                ]
-            }
-            
-            trips = list(mongo.db.LichTrinh.find(trips_query).sort('ngayDi', 1).limit(10))
-            
-            # Enrich trip data
-            for trip in trips:
-                # Thông tin xe
-                xe = mongo.db.XeKhach.find_one({'maXeKhach': trip.get('maXe')})
-                trip['xe_info'] = xe if xe else {}
-                
-                # Giá vé - tìm theo nhiều cách
-                gia_ve = mongo.db.GiaVe.find_one({
+            if route_key not in routes_dict:
+                # Tìm thông tin tuyến trong TuyenDuong (nếu có)
+                tuyen_info = mongo.db.TuyenDuong.find_one({
                     '$or': [
-                        {'tuyen': tuyen.get('maTuyenDuong')},
-                        {'maTuyenDuong': tuyen.get('maTuyenDuong')},
-                        {'maHangXe': xe.get('maHang'), 'maLoaiXe': xe.get('maLoai')} if xe else {}
-                    ],
-                    'tinhTrang': {'$in': ['Hoạt động', 'Đang áp dụng']}
-                }) if xe else None
-                
-                # Fallback giá VIP30 nếu không tìm thấy
-                if not gia_ve and xe and xe.get('maLoai') == 'VIP30':
-                    trip['gia_ve'] = 450000
-                else:
-                    trip['gia_ve'] = gia_ve.get('giaVe', 0) if gia_ve else 0
-                
-                # Số ghế còn trống
-                booked_seats = mongo.db.VeXe.count_documents({'maLichTrinh': trip.get('maLichTrinh')})
-                total_seats = mongo.db.Ghe.count_documents({'maLichTrinh': trip.get('maLichTrinh')})
-                trip['ghe_trong'] = max(0, total_seats - booked_seats)
-                trip['total_seats'] = total_seats
-            
-            if trips:  # Chỉ thêm tuyến có chuyến xe
-                routes_with_trips.append({
-                    'tuyen': tuyen,
-                    'trips': trips
+                        {'diemDau': diem_di, 'diemCuoi': diem_den},
+                        {'diemDau': diem_den, 'diemCuoi': diem_di}
+                    ]
                 })
+                
+                routes_dict[route_key] = {
+                    'tuyen': tuyen_info if tuyen_info else {
+                        'tenTuyenDuong': f"{diem_di} → {diem_den}",
+                        'diemDau': diem_di,
+                        'diemCuoi': diem_den,
+                        'maTuyenDuong': route_key
+                    },
+                    'trips': []
+                }
+            
+            # Thông tin xe
+            xe = mongo.db.XeKhach.find_one({'maXeKhach': trip.get('maXe')})
+            trip['xe_info'] = xe if xe else {}
+            
+            # Giá vé
+            gia_ve = mongo.db.GiaVe.find_one({
+                'tinhTrang': {'$in': ['Hoạt động', 'Đang áp dụng']}
+            }) if xe else None
+            
+            # Fallback giá VIP30 nếu không tìm thấy
+            if not gia_ve and xe and xe.get('maLoai') == 'VIP30':
+                trip['gia_ve'] = 450000
+            else:
+                trip['gia_ve'] = gia_ve.get('giaVe', 350000) if gia_ve else 350000
+            
+            # Số ghế còn trống
+            booked_seats = mongo.db.VeXe.count_documents({'maLichTrinh': trip.get('maLichTrinh')})
+            total_seats = mongo.db.Ghe.count_documents({'maLichTrinh': trip.get('maLichTrinh')})
+            trip['ghe_trong'] = max(0, total_seats - booked_seats)
+            trip['total_seats'] = total_seats
+            
+            routes_dict[route_key]['trips'].append(trip)
+        
+        # Convert dict to list
+        routes_with_trips = list(routes_dict.values())
+        
+        # Debug logging
+        print(f"DEBUG: Total available trips: {len(available_trips)}")
+        print(f"DEBUG: Routes with trips: {len(routes_with_trips)}")
+        if routes_with_trips:
+            print(f"DEBUG: First route: {routes_with_trips[0]['tuyen'].get('tenTuyenDuong')}")
+            print(f"DEBUG: First route trips count: {len(routes_with_trips[0]['trips'])}")
         
         return render_template('user/routes.html', routes_with_trips=routes_with_trips)
         
     except Exception as e:
         print(f"Error in routes(): {e}")
+        import traceback
+        traceback.print_exc()
         flash('Có lỗi khi tải danh sách tuyến đường')
         return redirect(url_for('user.index'))
 
